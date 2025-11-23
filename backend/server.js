@@ -12,9 +12,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
 const pool = new Pool({
-
   connectionString: process.env.DATABASE_URL, 
   ssl: {
     rejectUnauthorized: false 
@@ -24,6 +22,7 @@ const pool = new Pool({
 pool.connect()
   .then(() => console.log('Connected to Neon PostgreSQL Database!'))
   .catch(err => console.error('Database connection error:', err));
+
 
 app.get('/', (req, res) => {
   res.send('API is running...');
@@ -39,6 +38,11 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+export default app;
