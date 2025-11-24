@@ -2,6 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import pkg from 'pg'; 
+import summaryRoutes from './routes/Summary.js';
+
 const { Pool } = pkg; 
 
 dotenv.config();
@@ -11,6 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/summary', summaryRoutes);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL, 
