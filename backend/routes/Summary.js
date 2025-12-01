@@ -1,25 +1,24 @@
 import express from 'express';
 import pkg from 'pg';
-const { Pool } = pkg;
+import verifyToken from '../middleware/Auth.js'; 
 
+const { Pool } = pkg;
 const router = express.Router();
 
-// Using the connection string from .env
+// Database Connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// Helper to get User ID 
-const getUserId = (req) => 1; 
 
-// GET MONTHLY DATA
-router.get('/monthly', async (req, res) => {
+router.get('/monthly', verifyToken, async (req, res) => {
   const { year, month } = req.query;
-  const userId = getUserId(req);
+  
+
+  const userId = req.user.id || req.user.UserID; 
 
   try {
-    // This query groups everything by DAY
     const query = `
       SELECT 
         EXTRACT(DAY FROM d_date) as day,
@@ -39,10 +38,8 @@ router.get('/monthly', async (req, res) => {
       GROUP BY day
     `;
     
-    // Execute the query
     const result = await pool.query(query, [userId, year, parseInt(month) + 1]);
     
-    // Map results to an object with day as key
     const dataMap = {};
     result.rows.forEach(row => {
       dataMap[row.day] = {
@@ -58,13 +55,12 @@ router.get('/monthly', async (req, res) => {
   }
 });
 
-// GET YEARLY DATA
-router.get('/yearly', async (req, res) => {
+
+router.get('/yearly', verifyToken, async (req, res) => {
   const { year } = req.query;
-  const userId = getUserId(req);
+  const userId = req.user.id || req.user.UserID; 
 
   try {
-    // This query groups everything by MONTH
     const query = `
       SELECT 
         EXTRACT(MONTH FROM d_date) as month_num,
@@ -85,14 +81,12 @@ router.get('/yearly', async (req, res) => {
 
     const result = await pool.query(query, [userId, year]);
     
-    // Prepare an array for all 12 months with default 0 values
     const yearlyData = Array.from({ length: 12 }, (_, i) => ({
       monthIndex: i,
       income: 0,
       expense: 0
     }));
 
-    // Fill in the real data from database
     result.rows.forEach(row => {
       const idx = row.month_num - 1; 
       if (yearlyData[idx]) {
