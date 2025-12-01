@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import pkg from 'pg'; 
 import summaryRoutes from './routes/Summary.js';
+import authRoutes from './routes/authRoutes.js';
 
 const { Pool } = pkg; 
 
@@ -14,6 +15,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use('/api/summary', summaryRoutes);
+app.use('/api/auth', authRoutes); 
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL, 
