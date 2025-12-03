@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
-  font-family: Arial, sans-serif;
-  background-color: #121212;
-  color: #fff;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
 }
