@@ -1,28 +1,41 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar'; 
-import Summary from './pages/Summary';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import FirstPage from './components/FirstPage';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import Dashboard from './pages/Dashboard';
 import AddExpenses from './pages/AddExpenses-business';
 
-// Placeholder for Dashboard if you don't have it yet
-const Dashboard = () => <div className="p-10 text-center dark:text-white">Dashboard Page</div>;
+import Summary from './pages/Summary';
 
-const App = () => {
+function AppContent() {
+  const location = useLocation();
+
+  // Hide Navbar on these routes
+  const hideNavbarRoutes = ['/', '/signin', '/signup'];
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-[#111] transition-colors duration-300">
+      {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
+
+      <Routes>
+        <Route path="/" element={<FirstPage />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/add-expenses" element={<AddExpenses />} />
+        
+        <Route path="/summary" element={<Summary />} />
+      </Routes>
+    </div>
+  );
+}
+
+export default function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 dark:bg-[#111] transition-colors duration-300">
-        {/* Navbar sits here, OUTSIDE the Routes, so it appears on every page */}
-        <Navbar />
-        
-        <Routes>
-          <Route path="/" element={<Navigate to="/summary" replace />} />
-          <Route path="/summary" element={<Summary />} />
-          <Route path="/add-expenses" element={<AddExpenses />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-      </div>
+      <AppContent />
     </Router>
   );
-};
-
-export default App;
+}

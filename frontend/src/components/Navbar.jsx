@@ -60,7 +60,7 @@ export default function Navbar() {
 
             {/* Logout Button */}
             <Link
-              to="/logout"
+              to="/"
               className="flex items-center gap-2 bg-gray-100 dark:bg-[#444] text-gray-700 dark:text-white text-base font-semibold px-[18px] py-2 rounded-[7px] transition-all duration-300 hover:bg-[#EFB506] hover:text-[#111] hover:scale-105 shrink-0"
             >
               Logout <FiLogOut className="text-lg" />
