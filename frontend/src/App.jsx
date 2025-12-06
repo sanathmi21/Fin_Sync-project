@@ -6,6 +6,7 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
 import AddExpenses from './pages/AddExpenses-business';
+import AddExpense from './components/AddExpense';
 
 import Summary from './pages/Summary';
 
@@ -25,8 +26,8 @@ function AppContent() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/add-expenses" element={<AddExpenses />} />
-        
         <Route path="/summary" element={<Summary />} />
+        <Route path="/add-expenses" element={<AddExpense />} />
       </Routes>
     </div>
   );
