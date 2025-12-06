@@ -5,7 +5,8 @@ import FirstPage from './components/FirstPage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
-import AddExpenses from './pages/AddExpenses-business';
+import AddExpensesBusiness from './pages/AddExpenses-business';
+import AddExpenses from './pages/AddExpensesl';
 import Summary from './pages/Summary';
 import { useTheme } from './context/ThemeContext';
 
@@ -27,7 +28,7 @@ function AppContent() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard isDarkMode={isDarkMode} />} />
         <Route path="/add-expenses" element={<AddExpenses />} />
-        
+        <Route path="/add-expenses-business" element={<AddExpensesBusiness />} />     
         <Route path="/summary" element={<Summary />} />
       </Routes>
     </div>

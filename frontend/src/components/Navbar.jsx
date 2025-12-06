@@ -8,11 +8,20 @@ export default function Navbar() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme(); 
 
-  const navLinks = [
+  const userType = localStorage.getItem('userType') || 'Personal';
+
+  const baseLinks = [
     { name: 'Dash Board', path: '/dashboard' },
-    { name: 'Add Expenses', path: '/add-expenses' },
     { name: 'Summary', path: '/summary' },
   ];
+
+  const addExpenseLink =
+    userType === 'Business'
+      ? { name: 'Add Expenses', path: '/add-expenses-business' }
+      : { name: 'Add Expenses', path: '/add-expenses-personal' };
+
+  const navLinks = [...baseLinks.slice(0, 1), addExpenseLink, ...baseLinks.slice(1)];
+
 
   return (
     <header className="w-full bg-white dark:bg-[#111] sticky top-0 z-100 shadow-md dark:shadow-[0_2px_6px_rgba(0,0,0,0.3)] transition-colors duration-300">

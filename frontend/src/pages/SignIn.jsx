@@ -26,7 +26,7 @@ const SignIn = () => {
       if (res.ok) {
       // Save the token to localStorage
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userType', data.userType); 
+      localStorage.setItem('userType', data.Type); 
 
       // Redirect or update UI
       navigate('/dashboard'); } 
