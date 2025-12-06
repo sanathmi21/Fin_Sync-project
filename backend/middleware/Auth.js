@@ -1,9 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-// This middleware checks if the user sends a valid token
-// It replaces the hardcoded "getUserId" function
 const verifyToken = (req, res, next) => {
-  // 1. Get token from header (Format: "Bearer <token>")
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -12,15 +9,18 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    // 2. Verify the token using your secret key (Must match your friend's login code)
-    // Make sure process.env.JWT_SECRET is in your .env file
-    const verified = jwt.verify(token, process.env.JWT_SECRET || 'your_fallback_secret_key');
+    // Make sure JWT_SECRET matches what you used when creating tokens
+    const verified = jwt.verify(token, process.env.JWT_SECRET || 'mysecretkey');
     
-    // 3. Add the user payload to the request object
-    // Assuming your friend stored { id: 1, ... } in the token
+    // Ensure req.user has an id field
+    if (!verified.id) {
+      return res.status(400).json({ error: "Invalid token payload" });
+    }
+
     req.user = verified;
     next();
   } catch (err) {
+    console.error("JWT verification error:", err);
     res.status(400).json({ error: "Invalid Token" });
   }
 };

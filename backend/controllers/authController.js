@@ -1,8 +1,8 @@
-// authController.js
 import bcrypt from "bcryptjs";
-import pool from "../authdb.js";
+import {pool} from "../db.js";
+import jwt from "jsonwebtoken";
 
-// ---------- SIGN UP ----------
+//SIGN UP
 export const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -22,27 +22,28 @@ export const registerUser = async (req, res) => {
     }
 
     // HASH PASSWORD
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Insert new user
     const result = await pool.query(
       `INSERT INTO "Users" ("UserName", "Email", "Password")
        VALUES ($1, $2, $3)
-       RETURNING "UserID", "UserName", "Email"`,
+       RETURNING *`,
       [username, email, hashedPassword]
     );
 
     res.status(201).json({
-      message: "User registered successfully",
+      message: "Account created successfully !",
       user: result.rows[0],
     });
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ---------- SIGN IN ----------
+//SIGN IN
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -61,7 +62,6 @@ export const loginUser = async (req, res) => {
     }
 
     const user = result.rows[0];
-    console.log("User Row:", user);
 
     // Compare hashed password
     const isMatch = await bcrypt.compare(password, user.Password);
@@ -70,16 +70,18 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+
+    // Generate JWT
+    const token = jwt.sign(
+      { userId: user.UserID, username: user.UserName, userType: user.Type },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     res.json({
-      message: "Login successful",
-      user: {
-        UserID: user.UserID,
-        Username: user.UserName,
-        Email: user.Email,
-      },
-    });
+      message: "Login successful !", token });
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };

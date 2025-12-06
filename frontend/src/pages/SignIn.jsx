@@ -23,17 +23,15 @@ const SignIn = () => {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setMessage(data.message || "Login failed");
-        return;
-      }
+      if (res.ok) {
+      // Save the token to localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userType', data.userType); 
 
-      setMessage("Login successful!");
-
-      // You can store user info if needed
-      // localStorage.setItem("user", JSON.stringify(data.user));
-
-      navigate("/dashboard");
+      // Redirect or update UI
+      navigate('/dashboard'); } 
+      else {
+      alert(data.error || 'Login failed'); }
     } catch (err) {
       setMessage("Something went wrong. Try again.");
     }
@@ -104,6 +102,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-
-
-

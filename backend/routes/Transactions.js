@@ -35,7 +35,7 @@ router.get('/monthly', verifyToken, async (req, res) => {
     const incomeRes = await pool.query(incomeQuery, [userId, year, parseInt(month) + 1]);
     const expenseRes = await pool.query(expenseQuery, [userId, year, parseInt(month) + 1]);
 
-    // Process Income Names to extract Unit and Qty if stored as JSON
+    // Process income names to extract JSON details
     const processedIncomes = incomeRes.rows.map(row => {
       try {
         const details = JSON.parse(row.name);

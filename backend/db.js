@@ -1,18 +1,15 @@
+// db.js
 import pkg from "pg";
-const { Pool } = pkg;
 import dotenv from "dotenv";
-
 dotenv.config();
 
-const pool = new Pool({
+const { Pool } = pkg;
+
+export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: { rejectUnauthorized: false },
 });
 
 pool.connect()
-  .then(() => console.log("Connected to Neon PostgreSQL Database!"))
+  .then(() => console.log("Connected to NEON PostgreSQL Database!"))
   .catch(err => console.error("Database connection error:", err));
-
-export default pool;

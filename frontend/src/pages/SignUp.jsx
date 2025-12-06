@@ -13,7 +13,7 @@ const SignUp = () => {
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [message, setMessage] = useState("");
-  const [messageColor, setMessageColor] = useState("red"); 
+  const [messageColor, setMessageColor] = useState("red");  // To handle message color
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -37,7 +37,6 @@ const SignUp = () => {
       });
 
       const data = await res.json();
-      console.log("SignUp response:", data);
 
       if (!res.ok) {
         // Show backend message if signup failed
@@ -49,8 +48,8 @@ const SignUp = () => {
       // Success
       setMessage(data.message || "Account created successfully!");
       setMessageColor("green");
-
-      // Optional: wait 1 second before redirecting
+      
+      // Redirect to SignIn after a short delay
       setTimeout(() => navigate("/signin"), 1000);
     } catch (err) {
       console.error("SignUp fetch error:", err);
