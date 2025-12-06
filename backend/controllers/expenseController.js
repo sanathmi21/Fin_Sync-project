@@ -1,9 +1,9 @@
-const Expense = require('../models/Expense');
+import Expense from '../models/Expense.js';
 
 // @desc    Add new expense
 // @route   POST /api/expenses
 // @access  Private
-exports.addExpense = async (req, res) => {
+export const addExpense = async (req, res) => {
   try {
     const { name, category, amount, date, description, highPriority } = req.body;
 
@@ -56,7 +56,7 @@ exports.addExpense = async (req, res) => {
 // @desc    Get all expenses for user
 // @route   GET /api/expenses
 // @access  Private
-exports.getExpenses = async (req, res) => {
+export const getExpenses = async (req, res) => {
   try {
     const userId = req.user.id || 1;
     const expenses = await Expense.getUserExpenses(userId);
@@ -78,7 +78,7 @@ exports.getExpenses = async (req, res) => {
 // @desc    Get high priority expenses
 // @route   GET /api/expenses/high-priority
 // @access  Private
-exports.getHighPriorityExpenses = async (req, res) => {
+export const getHighPriorityExpenses = async (req, res) => {
   try {
     const userId = req.user.id || 1;
     const expenses = await Expense.getHighPriorityExpenses(userId);

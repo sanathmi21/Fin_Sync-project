@@ -1,4 +1,5 @@
-const pool = require('../config/db');
+// Change from require to import
+import pool from '../db.js';
 
 class Expense {
   // Add new expense
@@ -82,4 +83,5 @@ class Expense {
   }
 }
 
-module.exports = Expense;
+// Change from module.exports to export default
+export default Expense;
