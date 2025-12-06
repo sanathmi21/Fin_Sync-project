@@ -1,6 +1,6 @@
 // authController.js
 import bcrypt from "bcryptjs";
-import pool from "../authdb.js";
+import pool from "../db.js";
 
 // ---------- SIGN UP ----------
 export const registerUser = async (req, res) => {
