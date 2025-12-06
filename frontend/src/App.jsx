@@ -6,7 +6,7 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
 import AddExpensesBusiness from './pages/AddExpenses-business';
-import AddExpenses from './pages/AddExpensesl';
+import AddExpenses from './pages/AddExpenses';
 import Summary from './pages/Summary';
 import { useTheme } from './context/ThemeContext';
 
