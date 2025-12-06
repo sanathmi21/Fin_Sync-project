@@ -50,9 +50,21 @@ app.get('/test-db', async (req, res) => {
 });
 
 
+// ADD THIS: Health check endpoint (optional)
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+    console.log(`API Base: http://localhost:${PORT}/api`);
   });
 }
 
