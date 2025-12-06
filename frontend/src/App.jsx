@@ -5,8 +5,8 @@ import FirstPage from './components/FirstPage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
-import AddExpenses from './pages/AddExpenses-business';
-import AddExpense from './components/AddExpense';
+import AddExpenses from './pages/AddExpenses-business'; // Business expenses
+import AddExpense from './pages/AddExpense'; // Personal expenses
 
 import Summary from './pages/Summary';
 
@@ -25,9 +25,12 @@ function AppContent() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/add-expenses" element={<AddExpenses />} />
+
+        {/* TEMPORARY: Swap these to test AddExpense.jsx */}
+        <Route path="/add-expenses" element={<AddExpense />} /> {/* Now shows personal expenses */}
+        <Route path="/add-expense-business" element={<AddExpenses />} /> {/* Moved business to new route */}
+        
         <Route path="/summary" element={<Summary />} />
-        <Route path="/add-expenses" element={<AddExpense />} />
       </Routes>
     </div>
   );
