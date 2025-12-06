@@ -1,4 +1,5 @@
 // authController.js
+
 import bcrypt from "bcryptjs";
 import pool from "../authdb.js";
 

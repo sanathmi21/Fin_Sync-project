@@ -6,11 +6,13 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
 import AddExpenses from './pages/AddExpenses-business';
-
 import Summary from './pages/Summary';
+import { useTheme } from './context/ThemeContext';
 
 function AppContent() {
   const location = useLocation();
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark';
 
   // Hide Navbar on these routes
   const hideNavbarRoutes = ['/', '/signin', '/signup'];
@@ -23,7 +25,7 @@ function AppContent() {
         <Route path="/" element={<FirstPage />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard isDarkMode={isDarkMode} />} />
         <Route path="/add-expenses" element={<AddExpenses />} />
         
         <Route path="/summary" element={<Summary />} />
