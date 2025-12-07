@@ -28,7 +28,7 @@ function AppContent() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard isDarkMode={isDarkMode} />} />
         <Route path="/add-expenses" element={<AddExpenses />} />
-        <Route path="/add-expenses-business" element={<AddExpensesBusiness />} />     
+        <Route path="/add-expenses-business" element={<AddExpensesBusiness />} />  
         <Route path="/summary" element={<Summary />} />
       </Routes>
     </div>

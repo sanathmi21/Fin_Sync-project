@@ -28,6 +28,8 @@ const SignIn = () => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('userType', data.Type); 
 
+      console.log(localStorage.getItem('userType'));
+
       // Redirect or update UI
       navigate('/dashboard'); } 
       else {

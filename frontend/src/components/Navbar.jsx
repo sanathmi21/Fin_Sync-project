@@ -18,7 +18,7 @@ export default function Navbar() {
   const addExpenseLink =
     userType === 'Business'
       ? { name: 'Add Expenses', path: '/add-expenses-business' }
-      : { name: 'Add Expenses', path: '/add-expenses-personal' };
+      : { name: 'Add Expenses', path: '/add-expenses' };
 
   const navLinks = [...baseLinks.slice(0, 1), addExpenseLink, ...baseLinks.slice(1)];
 

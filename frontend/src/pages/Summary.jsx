@@ -65,7 +65,8 @@ function MonthlyView() {
           const data = await res.json();
           setMonthlyData(data);
         } catch (fetchErr) {
-          setMonthlyData(generateMonthlyData(daysInMonth));
+          console.error("Failed to fetch monthly data:", fetchErr);
+          setMonthlyData({});
         }
       } catch (error) {
         console.error(error);
@@ -139,17 +140,15 @@ function YearlyView() {
           const headers = { 'Content-Type': 'application/json' };
           if (token) headers['Authorization'] = `Bearer ${token}`;
 
-          const res = await fetch(`${API_URL}/api/summary/yearly?year=${year}`, { headers });
+          const res = await fetch(`${API_URL}/api/summary/monthly?year=${year}&month=${month + 1}`, { headers });
           if (!res.ok) throw new Error("Backend unavailable");
           const data = await res.json();
           setYearlyData(data.map((item, index) => ({
             ...item, monthName: monthNames[index], shortName: shortMonthNames[index]
           })));
         } catch (fetchErr) {
-          const mocks = generateYearlyData();
-          setYearlyData(mocks.map((item, index) => ({
-            ...item, monthName: monthNames[index], shortName: shortMonthNames[index]
-          })));
+          console.error("Failed to fetch yearly data:", fetchErr);
+          setYearlyData([]);
         }
       } catch (error) { console.error(error); } finally { setLoading(false); }
     };
