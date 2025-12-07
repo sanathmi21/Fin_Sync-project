@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { PlusCircle, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 
+// 🛠️ FIX 5: Add API base URL constant at the top
+const API_BASE_URL = 'http://localhost:5000/api';
+
 const AddExpense = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -30,25 +33,39 @@ const AddExpense = () => {
     fetchHighPriorityExpenses();
   }, []);
 
+  // 🛠️ FIX 5: Updated fetchExpenses function with logging
   const fetchExpenses = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/expenses');
+      console.log('📞 Fetching expenses from:', `${API_BASE_URL}/expenses`);
+      const response = await axios.get(`${API_BASE_URL}/expenses`);
+      console.log('✅ Expenses response:', response.data);
+      
       if (response.data.success) {
         setExpenses(response.data.data);
+      } else {
+        console.error('❌ Failed to fetch expenses:', response.data.message);
       }
     } catch (error) {
-      console.error('Error fetching expenses:', error);
+      console.error('❌ Error fetching expenses:', error);
+      console.error('Full error:', error.response?.data || error.message);
     }
   };
 
+  // 🛠️ FIX 5: Updated fetchHighPriorityExpenses function
   const fetchHighPriorityExpenses = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/expenses/high-priority');
+      console.log('📞 Fetching high priority expenses from:', `${API_BASE_URL}/expenses/high-priority`);
+      const response = await axios.get(`${API_BASE_URL}/expenses/high-priority`);
+      console.log('✅ High priority expenses response:', response.data);
+      
       if (response.data.success) {
         setHighPriorityExpenses(response.data.data);
+      } else {
+        console.error('❌ Failed to fetch high priority expenses:', response.data.message);
       }
     } catch (error) {
-      console.error('Error fetching high priority expenses:', error);
+      console.error('❌ Error fetching high priority expenses:', error);
+      console.error('Full error:', error.response?.data || error.message);
     }
   };
 
@@ -60,6 +77,7 @@ const AddExpense = () => {
     }));
   };
 
+  // 🛠️ FIX 5: Updated handleSubmit function with logging and proper headers
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -78,7 +96,16 @@ const AddExpense = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await axios.post('http://localhost:5000/api/expenses', formData);
+      console.log('📤 Submitting expense to:', `${API_BASE_URL}/expenses`);
+      console.log('📦 Expense data:', formData);
+      
+      const response = await axios.post(`${API_BASE_URL}/expenses`, formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('✅ Add expense response:', response.data);
       
       if (response.data.success) {
         setMessage({
@@ -101,7 +128,9 @@ const AddExpense = () => {
         fetchHighPriorityExpenses();
       }
     } catch (error) {
-      console.error('Error adding expense:', error);
+      console.error('❌ Error adding expense:', error);
+      console.error('Full error:', error.response?.data || error.message);
+      
       setMessage({
         type: 'error',
         text: error.response?.data?.message || 'Failed to add expense. Please try again.'
