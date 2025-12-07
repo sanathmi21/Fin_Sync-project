@@ -1,5 +1,13 @@
 import Expense from '../models/Expense.js';
 
+// Middleware to extract user ID from token (simplified for now)
+const extractUserId = (req, res, next) => {
+  // For testing, use a default user ID
+  // In production, you should decode JWT token
+  req.user = { id: 1, UserID: 1 }; // Use ID 1 for testing
+  next();
+};
+
 // @desc    Add new expense
 // @route   POST /api/expenses
 // @access  Private
@@ -22,7 +30,10 @@ export const addExpense = async (req, res) => {
       });
     }
 
-    const userId = req.user.id || 1; // For testing, replace with actual user ID from auth
+    // Get user ID - For now, use default or get from token
+    const userId = req.user?.UserID || req.user?.id || 1; // Default to user 1 for testing
+
+    console.log('Adding expense for user:', userId, 'Data:', req.body);
 
     // Create expense
     const newExpense = await Expense.addExpense(userId, {
@@ -44,11 +55,11 @@ export const addExpense = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error adding expense:', error);
+    console.error('❌ Error adding expense:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while adding expense',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: error.message
     });
   }
 };
@@ -58,7 +69,11 @@ export const addExpense = async (req, res) => {
 // @access  Private
 export const getExpenses = async (req, res) => {
   try {
-    const userId = req.user.id || 1;
+    // Get user ID - For now, use default or get from token
+    const userId = req.user?.UserID || req.user?.id || 1; // Default to user 1 for testing
+    
+    console.log('Fetching expenses for user:', userId);
+
     const expenses = await Expense.getUserExpenses(userId);
 
     res.status(200).json({
@@ -67,7 +82,7 @@ export const getExpenses = async (req, res) => {
       data: expenses
     });
   } catch (error) {
-    console.error('Error getting expenses:', error);
+    console.error('❌ Error getting expenses:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching expenses'
@@ -80,7 +95,9 @@ export const getExpenses = async (req, res) => {
 // @access  Private
 export const getHighPriorityExpenses = async (req, res) => {
   try {
-    const userId = req.user.id || 1;
+    // Get user ID - For now, use default or get from token
+    const userId = req.user?.UserID || req.user?.id || 1; // Default to user 1 for testing
+
     const expenses = await Expense.getHighPriorityExpenses(userId);
 
     res.status(200).json({
@@ -89,7 +106,7 @@ export const getHighPriorityExpenses = async (req, res) => {
       data: expenses
     });
   } catch (error) {
-    console.error('Error getting high priority expenses:', error);
+    console.error('❌ Error getting high priority expenses:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching high priority expenses'
