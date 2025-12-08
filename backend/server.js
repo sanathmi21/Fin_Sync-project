@@ -2,11 +2,10 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import pkg from 'pg'; 
-import summaryRoutes from './routes/Summary.js';
+// Remove summaryRoutes import
 import authRoutes from './routes/authRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import incomeRoutes from './routes/incomeRoutes.js';
-
 
 const { Pool } = pkg; 
 
@@ -20,7 +19,7 @@ app.use(cors({
   methods: ["GET","POST","PUT","DELETE"]
 }));
 app.use(express.json());
-app.use('/api/summary', summaryRoutes);
+// Remove summaryRoutes usage
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/income', incomeRoutes);
@@ -36,7 +35,6 @@ pool.connect()
   .then(() => console.log('Connected to Neon PostgreSQL Database!'))
   .catch(err => console.error('Database connection error:', err));
 
-
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
@@ -51,8 +49,6 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-
-// ADD THIS: Health check endpoint (optional)
 app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,

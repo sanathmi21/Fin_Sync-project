@@ -1,4 +1,6 @@
 import pool from '../db.js';
+import Income from '../models/Income.js';
+import Expense from '../models/Expense.js';
 
 // @desc    Add new income
 // @route   POST /api/income
@@ -37,46 +39,16 @@ export const addIncome = async (req, res) => {
     
     console.log(`💰 Creating income for UserID: ${userId}`);
 
-    // Insert income
-    const incomeQuery = `
-      INSERT INTO "Income" 
-      ("UserID", "In_Name", "In_Date", "In_Amount")
-      VALUES ($1, $2, $3, $4)
-      RETURNING *;
-    `;
-    
-    const values = [
-      userId,
-      name,
-      date,
-      parseFloat(amount)
-    ];
+    // Use Income model to create income
+    const incomeData = {
+      UserID: userId,
+      In_Name: name,
+      In_Date: date,
+      In_Amount: parseFloat(amount)
+    };
 
-    console.log('🔍 SQL Query:', incomeQuery);
-    console.log('🔍 Values:', values);
-
-    const incomeResult = await pool.query(incomeQuery, values);
-    const newIncome = incomeResult.rows[0];
-
-    console.log('✅ Income inserted successfully:', newIncome);
-
-    // Update balance summary
-    try {
-      const balanceQuery = `
-        INSERT INTO "Balance_Summary" 
-        ("UserID", "Date", "Total_Income", "Total_Expense", "Total_Balance")
-        VALUES ($1, $2, $3, 0, $3)
-        ON CONFLICT ("UserID", "Date") DO UPDATE SET
-          "Total_Income" = "Balance_Summary"."Total_Income" + EXCLUDED."Total_Income",
-          "Total_Balance" = "Balance_Summary"."Total_Balance" + EXCLUDED."Total_Income"
-        RETURNING *;
-      `;
-      
-      await pool.query(balanceQuery, [userId, date, parseFloat(amount)]);
-      console.log('✅ Balance summary updated');
-    } catch (balanceError) {
-      console.log('⚠️ Could not update balance summary:', balanceError.message);
-    }
+    const newIncome = await Income.create(incomeData);
+    console.log('✅ Income created successfully:', newIncome);
 
     res.status(201).json({
       success: true,
@@ -88,7 +60,7 @@ export const addIncome = async (req, res) => {
     console.error('❌ Error adding income:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while adding income',
+      message: error.message || 'Server error while adding income',
       error: error.message
     });
   }
@@ -115,27 +87,15 @@ export const getIncome = async (req, res) => {
     
     console.log(`📊 Fetching income for UserID: ${userId}`);
 
-    const query = `
-      SELECT 
-        "IncomeID",
-        "In_Name",
-        "In_Date",
-        "In_Amount",
-        "UserID"
-      FROM "Income" 
-      WHERE "UserID" = $1 
-      ORDER BY "In_Date" DESC 
-      LIMIT 50;
-    `;
-    
-    const result = await pool.query(query, [userId]);
+    // Use Income model to get income
+    const incomeRecords = await Income.getAllByUser(userId);
 
-    console.log(`📊 Found ${result.rows.length} income records for user ${userId}`);
+    console.log(`📊 Found ${incomeRecords.length} income records for user ${userId}`);
 
     res.status(200).json({
       success: true,
-      count: result.rows.length,
-      data: result.rows
+      count: incomeRecords.length,
+      data: incomeRecords
     });
   } catch (error) {
     console.error('❌ Error getting income:', error);
@@ -165,72 +125,40 @@ export const deleteIncome = async (req, res) => {
 
     const userId = userResult.rows[0].UserID;
 
-    // Check if income exists
-    const incomeCheck = await pool.query(
-      'SELECT "In_Amount", "In_Date" FROM "Income" WHERE "IncomeID" = $1 AND "UserID" = $2',
-      [id, userId]
-    );
-
-    if (incomeCheck.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Income not found'
-      });
-    }
-
-    // Delete income
-    await pool.query(
-      'DELETE FROM "Income" WHERE "IncomeID" = $1 AND "UserID" = $2',
-      [id, userId]
-    );
-
-    // Update balance (subtract the amount since income is deleted)
-    const amount = parseFloat(incomeCheck.rows[0].In_Amount);
-    const date = incomeCheck.rows[0].In_Date;
-    
-    try {
-      const balanceQuery = `
-        UPDATE "Balance_Summary" 
-        SET 
-          "Total_Income" = "Total_Income" - $3,
-          "Total_Balance" = "Total_Balance" - $3
-        WHERE "UserID" = $1 AND "Date" = $2;
-      `;
-      
-      await pool.query(balanceQuery, [userId, date, amount]);
-    } catch (balanceError) {
-      console.log('⚠️ Could not update balance on delete:', balanceError.message);
-    }
+    // Use Income model to delete income
+    const deletedIncome = await Income.delete(id, userId);
 
     res.status(200).json({
       success: true,
-      message: 'Income deleted successfully'
+      message: 'Income deleted successfully',
+      data: deletedIncome
     });
   } catch (error) {
     console.error('❌ Error deleting income:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while deleting income',
+      message: error.message || 'Server error while deleting income',
       error: error.message
     });
   }
 };
 
 // @desc    Get financial summary
-// @route   GET /api/summary
+// @route   GET /api/income/summary
 export const getFinancialSummary = async (req, res) => {
   try {
     // Get the first user from database
     const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
     
     if (userResult.rows.length === 0) {
+      const now = new Date();
       return res.status(200).json({
         success: true,
         data: {
           totalIncome: 0,
           totalExpenses: 0,
           balance: 0,
-          currentMonth: new Date().toLocaleString('default', { month: 'long', year: 'numeric' })
+          currentMonth: now.toLocaleString('default', { month: 'long', year: 'numeric' })
         }
       });
     }
@@ -242,31 +170,9 @@ export const getFinancialSummary = async (req, res) => {
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
     
-    // Calculate total income for current month
-    const incomeQuery = `
-      SELECT COALESCE(SUM("In_Amount"), 0) as total_income
-      FROM "Income"
-      WHERE "UserID" = $1 
-        AND EXTRACT(MONTH FROM "In_Date") = $2
-        AND EXTRACT(YEAR FROM "In_Date") = $3
-    `;
-    
-    const incomeResult = await pool.query(incomeQuery, [userId, currentMonth, currentYear]);
-    const totalIncome = parseFloat(incomeResult.rows[0].total_income);
-    
-    // Calculate total expenses for current month
-    const expenseQuery = `
-      SELECT COALESCE(SUM("Ex_Amount"), 0) as total_expenses
-      FROM "Expenses"
-      WHERE "UserID" = $1 
-        AND EXTRACT(MONTH FROM "Ex_Date") = $2
-        AND EXTRACT(YEAR FROM "Ex_Date") = $3
-    `;
-    
-    const expenseResult = await pool.query(expenseQuery, [userId, currentMonth, currentYear]);
-    const totalExpenses = parseFloat(expenseResult.rows[0].total_expenses);
-    
-    // Calculate balance
+    // Calculate totals using models
+    const totalIncome = await Income.getTotalByMonth(userId, currentMonth, currentYear);
+    const totalExpenses = await Expense.getTotalByMonth(userId, currentMonth, currentYear);
     const balance = totalIncome - totalExpenses;
     
     res.status(200).json({
@@ -284,6 +190,109 @@ export const getFinancialSummary = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error while fetching financial summary',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get detailed financial statistics
+// @route   GET /api/income/statistics
+export const getFinancialStatistics = async (req, res) => {
+  try {
+    // Get the first user from database
+    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
+    
+    if (userResult.rows.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          incomeStats: {
+            total_count: 0,
+            total_amount: 0,
+            average_amount: 0,
+            max_amount: 0,
+            min_amount: 0
+          },
+          expensesByCategory: [],
+          balance: 0
+        }
+      });
+    }
+
+    const userId = userResult.rows[0].UserID;
+    
+    // Get current month and year
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    
+    // Get detailed statistics
+    const incomeStats = await Income.getStatistics(userId, currentMonth, currentYear);
+    const expensesByCategory = await Expense.getByCategoryForMonth(userId, currentMonth, currentYear);
+    const totalExpenses = expensesByCategory.reduce((sum, cat) => sum + parseFloat(cat.total_amount), 0);
+    const balance = incomeStats.total_amount - totalExpenses;
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        incomeStats,
+        expensesByCategory,
+        totalExpenses,
+        totalIncome: incomeStats.total_amount,
+        balance,
+        currentMonth: now.toLocaleString('default', { month: 'long', year: 'numeric' })
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Error getting financial statistics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching financial statistics',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Search income
+// @route   GET /api/income/search
+export const searchIncome = async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q || q.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a search term'
+      });
+    }
+
+    // Get the first user from database
+    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
+    
+    if (userResult.rows.length === 0) {
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        data: []
+      });
+    }
+
+    const userId = userResult.rows[0].UserID;
+
+    // Use Income model to search income
+    const incomeRecords = await Income.search(userId, q);
+
+    res.status(200).json({
+      success: true,
+      count: incomeRecords.length,
+      data: incomeRecords
+    });
+  } catch (error) {
+    console.error('❌ Error searching income:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while searching income',
       error: error.message
     });
   }

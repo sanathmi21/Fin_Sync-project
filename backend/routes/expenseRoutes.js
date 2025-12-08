@@ -3,7 +3,8 @@ import {
   addExpense,
   getExpenses,
   getHighPriorityExpenses,
-  deleteExpense
+  deleteExpense,
+  searchExpenses 
 } from '../controllers/expenseController.js';
 
 const router = express.Router();
@@ -29,5 +30,7 @@ router.get('/high-priority', getHighPriorityExpenses);
 // @desc    Delete an expense
 // @access  Private
 router.delete('/:id', deleteExpense);
+
+router.get('/search', searchExpenses);
 
 export default router;
