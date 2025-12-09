@@ -1,27 +1,39 @@
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
-// This middleware checks if the user sends a valid token
-// It replaces the hardcoded "getUserId" function
 const verifyToken = (req, res, next) => {
-  // 1. Get token from header (Format: "Bearer <token>")
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
+  console.log('🔑 Auth Header:', authHeader);
+  console.log('🔑 Token:', token ? token.substring(0, 20) + '...' : 'No token');
+
   if (!token) {
+    console.log('❌ No token provided');
     return res.status(401).json({ error: "Access Denied. No token provided." });
   }
 
   try {
-    // 2. Verify the token using your secret key (Must match your friend's login code)
-    // Make sure process.env.JWT_SECRET is in your .env file
-    const verified = jwt.verify(token, process.env.JWT_SECRET || 'your_fallback_secret_key');
+    const verified = jwt.verify(token, process.env.JWT_SECRET || 'mysecretkey');
+    console.log('✅ Token verified for user:', verified.id);
     
-    // 3. Add the user payload to the request object
-    // Assuming your friend stored { id: 1, ... } in the token
+    if (!verified.id) {
+      console.log('❌ Token missing id field');
+      return res.status(400).json({ error: "Invalid token payload" });
+    }
+
     req.user = verified;
     next();
   } catch (err) {
-    res.status(400).json({ error: "Invalid Token" });
+    console.error("❌ JWT verification error:", err.message);
+    if (err.name === 'TokenExpiredError') {
+      res.status(401).json({ error: "Token expired. Please login again." });
+    } else if (err.name === 'JsonWebTokenError') {
+      res.status(400).json({ error: "Invalid token" });
+    } else {
+      res.status(400).json({ error: "Invalid Token" });
+    }
   }
 };
 

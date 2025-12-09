@@ -25,17 +25,15 @@ export const addIncome = async (req, res) => {
       });
     }
 
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(400).json({
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
         success: false,
-        message: 'No users found. Please register first.'
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
     
     console.log(`💰 Creating income for UserID: ${userId}`);
 
@@ -72,18 +70,15 @@ export const getIncome = async (req, res) => {
   console.log('📋 Get Income Request');
   
   try {
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(200).json({
-        success: true,
-        count: 0,
-        data: []
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
     
     console.log(`📊 Fetching income for UserID: ${userId}`);
 
@@ -113,17 +108,15 @@ export const deleteIncome = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
         success: false,
-        message: 'User not found'
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
 
     // Use Income model to delete income
     const deletedIncome = await Income.delete(id, userId);
@@ -147,23 +140,15 @@ export const deleteIncome = async (req, res) => {
 // @route   GET /api/income/summary
 export const getFinancialSummary = async (req, res) => {
   try {
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      const now = new Date();
-      return res.status(200).json({
-        success: true,
-        data: {
-          totalIncome: 0,
-          totalExpenses: 0,
-          balance: 0,
-          currentMonth: now.toLocaleString('default', { month: 'long', year: 'numeric' })
-        }
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
     
     // Get current month and year
     const now = new Date();
@@ -199,27 +184,15 @@ export const getFinancialSummary = async (req, res) => {
 // @route   GET /api/income/statistics
 export const getFinancialStatistics = async (req, res) => {
   try {
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(200).json({
-        success: true,
-        data: {
-          incomeStats: {
-            total_count: 0,
-            total_amount: 0,
-            average_amount: 0,
-            max_amount: 0,
-            min_amount: 0
-          },
-          expensesByCategory: [],
-          balance: 0
-        }
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
     
     // Get current month and year
     const now = new Date();
@@ -267,18 +240,15 @@ export const searchIncome = async (req, res) => {
       });
     }
 
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(200).json({
-        success: true,
-        count: 0,
-        data: []
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
 
     // Use Income model to search income
     const incomeRecords = await Income.search(userId, q);

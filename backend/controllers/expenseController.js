@@ -24,17 +24,15 @@ export const addExpense = async (req, res) => {
       });
     }
 
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(400).json({
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
         success: false,
-        message: 'No users found. Please register first.'
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
     
     console.log(`💰 Creating expense for UserID: ${userId}`);
 
@@ -74,17 +72,15 @@ export const deleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
         success: false,
-        message: 'User not found'
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
 
     // Use Expense model to delete expense
     const deletedExpense = await Expense.delete(id, userId);
@@ -110,18 +106,15 @@ export const getExpenses = async (req, res) => {
   console.log('📋 Get Expenses Request');
   
   try {
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(200).json({
-        success: true,
-        count: 0,
-        data: []
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
     
     console.log(`📊 Fetching expenses for UserID: ${userId}`);
 
@@ -149,18 +142,15 @@ export const getExpenses = async (req, res) => {
 // @route   GET /api/expenses/high-priority
 export const getHighPriorityExpenses = async (req, res) => {
   try {
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(200).json({
-        success: true,
-        count: 0,
-        data: []
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
 
     // Use Expense model to get high priority expenses
     const highPriorityExpenses = await Expense.getHighPriority(userId);
@@ -192,18 +182,15 @@ export const searchExpenses = async (req, res) => {
       });
     }
 
-    // Get the first user from database
-    const userResult = await pool.query('SELECT "UserID" FROM "Users" ORDER BY "UserID" LIMIT 1');
-    
-    if (userResult.rows.length === 0) {
-      return res.status(200).json({
-        success: true,
-        count: 0,
-        data: []
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
       });
     }
 
-    const userId = userResult.rows[0].UserID;
+    const userId = req.user.id;
 
     // Use Expense model to search expenses
     const expenses = await Expense.search(userId, q);
