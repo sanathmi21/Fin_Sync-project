@@ -1,12 +1,18 @@
 // authController.js
 import bcrypt from "bcryptjs";
-import pool from "../authdb.js";
+import pool from "../db.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET || "your_fallback_secret_key";
+const JWT_EXPIRES_IN = "7d";
 
 // ---------- SIGN UP ----------
 export const registerUser = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, type } = req.body;  //  ADDED type
 
-  if (!username || !email || !password) {
+  if (!username || !email || !password || !type) {       //  Validate type
     return res.status(400).json({ message: "All fields are required" });
   }
 
@@ -24,12 +30,12 @@ export const registerUser = async (req, res) => {
     // HASH PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert new user
+    // ⭐ INSERT TYPE INTO DATABASE
     const result = await pool.query(
-      `INSERT INTO "Users" ("UserName", "Email", "Password")
-       VALUES ($1, $2, $3)
-       RETURNING "UserID", "UserName", "Email"`,
-      [username, email, hashedPassword]
+      `INSERT INTO "Users" ("UserName", "Email", "Password", "Type")
+       VALUES ($1, $2, $3, $4)
+       RETURNING "UserID", "UserName", "Email", "Type"`,
+      [username, email, hashedPassword, type]
     );
 
     res.status(201).json({
@@ -44,38 +50,54 @@ export const registerUser = async (req, res) => {
 
 // ---------- SIGN IN ----------
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, loginType } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email & password required" });
+  //  NEW VALIDATION
+  if (!email || !password || !loginType) {
+    return res
+      .status(400)
+      .json({ message: "Email, password & account type required" });
   }
 
   try {
+    // CHECK EMAIL + TYPE MATCH
     const result = await pool.query(
-      `SELECT * FROM "Users" WHERE "Email" = $1`,
-      [email]
+      `SELECT * FROM "Users" WHERE "Email" = $1 AND "Type" = $2`,
+      [email, loginType]
     );
 
     if (result.rows.length === 0) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res
+        .status(400)
+        .json({ message: "Invalid account type or email" });
     }
 
     const user = result.rows[0];
-    console.log("User Row:", user);
 
     // Compare hashed password
     const isMatch = await bcrypt.compare(password, user.Password);
-
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ message: "Invalid password" });
     }
+
+    const token = jwt.sign(
+      {
+        id: user.UserID,
+        type: user.Type.toLowerCase(),
+        email: user.Email
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
 
     res.json({
       message: "Login successful",
+      token: token,
       user: {
         UserID: user.UserID,
         Username: user.UserName,
         Email: user.Email,
+        Type: user.Type,
       },
     });
   } catch (err) {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -7,9 +7,13 @@ const SignIn = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
+  const [loginType, setLoginType] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [message, setMessage] = useState("");
+
+  const [headingText, setHeadingText] = useState("Sign in to your account");
+  const [headingColor, setHeadingColor] = useState("text-gray-300");
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -18,26 +22,65 @@ const SignIn = () => {
       const res = await fetch(`${API_URL}/api/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, loginType }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
         setMessage(data.message || "Login failed");
+
+        setTimeout(() => {
+          setEmail("");
+          setPassword("");
+          setLoginType("");
+        }, 450);
+
         return;
       }
 
-      setMessage("Login successful!");
+      // ⭐ SUCCESS MESSAGE FIXED
+      setHeadingText("Signed in successfully!");
+      setHeadingColor("text-green-500");
+      setMessage("");
 
-      // You can store user info if needed
-      // localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem('token', data.token);
 
-      navigate("/dashboard");
+
+      // ⭐ DELAY 450ms BEFORE REDIRECT
+      setTimeout(() => {
+        if (loginType.toLowerCase() === "personal") {
+          navigate("/dashboard");
+        } else if (loginType.toLowerCase() === "business") {
+          navigate("/dashboard-business");
+        }
+      }, 450);
+
     } catch (err) {
       setMessage("Something went wrong. Try again.");
+
+      setTimeout(() => {
+        setEmail("");
+        setPassword("");
+        setLoginType("");
+      }, 450);
     }
   };
+
+  // ⭐ Custom Dropdown
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef();
+  const options = ["Personal", "Business"];
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
@@ -47,11 +90,17 @@ const SignIn = () => {
           <span className="text-yellow-400">Penny</span>
           <span className="text-green-500">Pal</span>
         </h1>
-        <p className="text-gray-300 text-center mb-6">Sign in to your account</p>
+
+        {/* ⭐ Dynamic heading */}
+        <p className={`text-center mb-6 ${headingColor}`}>
+          {headingText}
+        </p>
 
         {message && <p className="text-center text-red-400 mb-2">{message}</p>}
 
         <form className="space-y-4" onSubmit={handleSignIn}>
+
+          {/* Email */}
           <div>
             <label className="text-gray-200 block mb-1">E-mail :</label>
             <input
@@ -64,6 +113,41 @@ const SignIn = () => {
             />
           </div>
 
+          {/* Dropdown */}
+          <div ref={dropdownRef} className="relative">
+            <label className="text-gray-200 mb-1 block">Type of Account :</label>
+
+            <div
+              className="w-full p-2 bg-black text-white rounded-lg cursor-pointer flex justify-between items-center"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              {loginType || <span className="text-gray-400">Select account type</span>}
+              <span className="ml-2">▼</span>
+            </div>
+
+            <ul
+              className={`absolute w-full bg-black rounded-lg mt-1 shadow-lg z-10 max-h-40 overflow-auto transition-all duration-300 origin-top ${
+                dropdownOpen
+                  ? "scale-y-100 opacity-100"
+                  : "scale-y-0 opacity-0 pointer-events-none"
+              }`}
+            >
+              {options.map((opt) => (
+                <li
+                  key={opt}
+                  className="p-2 hover:bg-gray-700 cursor-pointer text-white"
+                  onClick={() => {
+                    setLoginType(opt);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  {opt}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Password */}
           <div>
             <label className="text-gray-200 block mb-1">Password :</label>
             <div className="relative">
@@ -85,11 +169,12 @@ const SignIn = () => {
           </div>
 
           <button
-            className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition-all duration-300 hover:scale-105 shrink-0"
+            className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition-all duration-300 hover:scale-105"
             type="submit"
           >
             Sign In
           </button>
+
         </form>
 
         <p className="text-center text-gray-300 mt-4">
@@ -98,12 +183,10 @@ const SignIn = () => {
             Sign up
           </Link>
         </p>
+
       </div>
     </div>
   );
 };
 
 export default SignIn;
-
-
-

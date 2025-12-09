@@ -1,4 +1,6 @@
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // This middleware checks if the user sends a valid token
 // It replaces the hardcoded "getUserId" function
@@ -14,7 +16,7 @@ const verifyToken = (req, res, next) => {
   try {
     // 2. Verify the token using your secret key (Must match your friend's login code)
     // Make sure process.env.JWT_SECRET is in your .env file
-    const verified = jwt.verify(token, process.env.JWT_SECRET || 'your_fallback_secret_key');
+    const verified = jwt.verify(token, process.env.JWT_SECRET || 'mysecretkey');
     
     // 3. Add the user payload to the request object
     // Assuming your friend stored { id: 1, ... } in the token
