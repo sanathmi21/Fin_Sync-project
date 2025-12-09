@@ -1,6 +1,6 @@
 // backend/routes/transactions.js
 import express from "express";
-import pool from "../db.js";
+import {pool} from "../db.js";
 import verifyToken from "../middleware/Auth.js";
 import verifyBusinessUser from "../middleware/verifyBusinessUser.js";
 
