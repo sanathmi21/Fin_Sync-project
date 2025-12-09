@@ -42,26 +42,12 @@ router.get("/monthly", verifyToken, async (req, res) => {
       ORDER BY "Busi_Ex_Date" DESC
     `;
 
-<<<<<<< HEAD
+
     const incomes = (await pool.query(incomesQuery, [userID, year, monthNum])).rows;
     const expenses = (await pool.query(expensesQuery, [userID, year, monthNum])).rows;
 
     res.json({ incomes, expenses });
-=======
-    // Process income names to extract JSON details
-    const processedIncomes = incomeRes.rows.map(row => {
-      try {
-        const details = JSON.parse(row.name);
-        return {
-          ...row,
-          unit: details.unit,
-          qty: details.qty
-        };
-      } catch (e) {
-        return row;
-      }
-    });
->>>>>>> c604ccb31ac90f70386110acfd90051fe676ce17
+
 
   } catch (err) {
     console.error("MONTHLY DATA ERROR:", err);
