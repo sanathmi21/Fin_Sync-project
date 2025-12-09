@@ -56,7 +56,7 @@ const SignIn = () => {
         if (loginType.toLowerCase() === "personal") {
           navigate("/dashboard");
         } else if (loginType.toLowerCase() === "business") {
-          navigate("/dashboard-business");
+          navigate("/dashboard");
         } else {
           // Fallback
           navigate("/dashboard");
