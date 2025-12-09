@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { jsPDF } from 'jspdf';
 
-// --- Inline Icons (Replacements for react-icons) ---
 const DownloadIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -22,7 +21,7 @@ const ChevronRightIcon = ({ className }) => (
   </svg>
 );
 
-// --- Script Loader ---
+
 const loadScript = (src) => {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) {
@@ -37,29 +36,7 @@ const loadScript = (src) => {
   });
 };
 
-// --- Mock Data Generators ---
-const generateMonthlyData = (daysInMonth) => {
-  const data = {};
-  for (let i = 1; i <= daysInMonth; i++) {
-    if (Math.random() > 0.7) {
-      data[i] = {
-        income: Math.random() > 0.5 ? Math.floor(Math.random() * 5000) : 0,
-        expense: Math.random() > 0.5 ? Math.floor(Math.random() * 3000) : 0,
-      };
-    }
-  }
-  return data;
-};
-
-const generateYearlyData = () => {
-  return Array.from({ length: 12 }, (_, i) => ({
-    monthIndex: i,
-    income: Math.floor(Math.random() * 50000) + 20000,
-    expense: Math.floor(Math.random() * 30000) + 10000,
-  }));
-};
-
-// --- Monthly View Component ---
+// Monthly View Component
 function MonthlyView() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [monthlyData, setMonthlyData] = useState({}); 
@@ -88,7 +65,8 @@ function MonthlyView() {
           const data = await res.json();
           setMonthlyData(data);
         } catch (fetchErr) {
-          setMonthlyData(generateMonthlyData(daysInMonth));
+          console.error("Failed to fetch monthly data:", fetchErr);
+          setMonthlyData({});
         }
       } catch (error) {
         console.error(error);
@@ -141,7 +119,7 @@ function MonthlyView() {
   );
 }
 
-// --- Yearly View Component ---
+//Yearly View Componen
 function YearlyView() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [yearlyData, setYearlyData] = useState([]); 
@@ -162,17 +140,15 @@ function YearlyView() {
           const headers = { 'Content-Type': 'application/json' };
           if (token) headers['Authorization'] = `Bearer ${token}`;
 
-          const res = await fetch(`${API_URL}/api/summary/yearly?year=${year}`, { headers });
+          const res = await fetch(`${API_URL}/api/summary/monthly?year=${year}&month=${month + 1}`, { headers });
           if (!res.ok) throw new Error("Backend unavailable");
           const data = await res.json();
           setYearlyData(data.map((item, index) => ({
             ...item, monthName: monthNames[index], shortName: shortMonthNames[index]
           })));
         } catch (fetchErr) {
-          const mocks = generateYearlyData();
-          setYearlyData(mocks.map((item, index) => ({
-            ...item, monthName: monthNames[index], shortName: shortMonthNames[index]
-          })));
+          console.error("Failed to fetch yearly data:", fetchErr);
+          setYearlyData([]);
         }
       } catch (error) { console.error(error); } finally { setLoading(false); }
     };
@@ -204,7 +180,7 @@ function YearlyView() {
       </div>
 
       <div className="flex mt-8 h-[400px] w-full pr-4">
-        <div className="flex flex-col justify-between text-gray-500 dark:text-gray-400 text-xs font-semibold pr-4 text-right h-full pb-8 w-[80px]">
+        <div className="flex flex-col justify-between text-gray-500 dark:text-gray-400 text-xs font-semibold pr-4 text-right h-full pb-8 w-20">
           <span className="text-base font-bold mb-2">Rs.</span>
           {yAxisLabels.map(label => (<span key={label}>{label.toLocaleString().replace(/,/g, ' ')}</span>))}
           <span>0</span>

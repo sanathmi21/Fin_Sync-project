@@ -264,7 +264,7 @@ export default function AddExpenses() {
               <p className="text-gray-500 dark:text-gray-400 font-medium text-lg mb-1">Total Income</p>
               <p className="text-green-600 dark:text-green-500 text-3xl font-bold">Rs. {totalIncome.toLocaleString()}</p>
             </div>
-            <div className="hidden sm:block h-16 w-[1px] bg-gray-300 dark:bg-gray-700"></div>
+            <div className="hidden sm:block h-16 w-px bg-gray-300 dark:bg-gray-700"></div>
             <div className="text-center">
               <p className="text-gray-500 dark:text-gray-400 font-medium text-lg mb-1">Total Expenses</p>
               <p className="text-yellow-600 dark:text-yellow-500 text-3xl font-bold">Rs. {totalExpense.toLocaleString()}</p>

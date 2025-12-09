@@ -2,11 +2,15 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiLogOut, FiSun, FiMoon, FiChevronDown } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
+
 import { getUserType } from "../utils/UserType";
+
+
 
 export default function Navbar() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+
 
   const userType = getUserType();
   const addExpensePath =
@@ -17,8 +21,18 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Dash Board', path: '/dashboard' },
     { name: 'Add Expenses', path: addExpensePath }, 
+
+
+ 
     { name: 'Summary', path: '/summary' },
   ];
+
+  const addExpenseLink =
+    userType === 'Business'
+      ? { name: 'Add Expenses', path: '/add-expenses-business' }
+      : { name: 'Add Expenses', path: '/add-expenses' };
+
+  
 
   return (
     <header className="w-full bg-gradient-to-r from-white to-white/95 dark:from-[#0a0a0a] dark:to-[#111]/95 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-100 dark:border-gray-800 transition-all duration-300">

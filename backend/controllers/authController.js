@@ -1,14 +1,16 @@
-// authController.js
 import bcrypt from "bcryptjs";
-import pool from "../db.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_fallback_secret_key";
+const JWT_SECRET = process.env.JWT_SECRET || "mysecretkey";
 const JWT_EXPIRES_IN = "7d";
 
-// ---------- SIGN UP ----------
+import {pool} from "../db.js";
+
+
+
+//SIGN UP
 export const registerUser = async (req, res) => {
   const { username, email, password, type } = req.body;  //  ADDED type
 
@@ -28,27 +30,30 @@ export const registerUser = async (req, res) => {
     }
 
     // HASH PASSWORD
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // ⭐ INSERT TYPE INTO DATABASE
     const result = await pool.query(
+
       `INSERT INTO "Users" ("UserName", "Email", "Password", "Type")
        VALUES ($1, $2, $3, $4)
        RETURNING "UserID", "UserName", "Email", "Type"`,
       [username, email, hashedPassword, type]
+
     );
 
     res.status(201).json({
-      message: "User registered successfully",
+      message: "Account created successfully !",
       user: result.rows[0],
     });
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// ---------- SIGN IN ----------
+//SIGN IN
 export const loginUser = async (req, res) => {
   const { email, password, loginType } = req.body;
 
@@ -80,6 +85,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
+
     const token = jwt.sign(
       {
         id: user.UserID,
@@ -100,8 +106,14 @@ export const loginUser = async (req, res) => {
         Type: user.Type,
       },
     });
+
+
+    
+
+    
+
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };

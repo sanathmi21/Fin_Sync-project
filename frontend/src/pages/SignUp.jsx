@@ -14,10 +14,14 @@ const SignUp = () => {
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [message, setMessage] = useState("");
+
   const [messageColor, setMessageColor] = useState("red");
 
   const [headingText, setHeadingText] = useState("Create an account");
   const [headingColor, setHeadingColor] = useState("text-gray-300");
+
+  
+
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -46,19 +50,21 @@ const SignUp = () => {
         setMessage(data.message || "Signup failed");
         setMessageColor("red");
 
-        // ❗ Keep inputs for retry — DO NOT clear on error
+        // Keep inputs for retry — DO NOT clear on error
         return;
       }
 
-      // ⭐ SUCCESS STATE — FIXED
+      // SUCCESS STATE — FIXED
       setHeadingText("Account created successfully!");
       setHeadingColor("text-green-500");
 
       setMessage("Account created successfully!");
       setMessageColor("green");
 
-      // ⭐ Delay redirect — FIXED TO 450ms
+
+      // Delay redirect — FIXED TO 450ms
       setTimeout(() => navigate("/signin"), 450);
+
 
     } catch (err) {
       console.error("SignUp fetch error:", err);
@@ -91,7 +97,7 @@ const SignUp = () => {
           <span className="text-green-500">Pal</span>
         </h1>
 
-        {/* ⭐ Dynamic heading text */}
+        {/* Dynamic heading text */}
         <p className={`text-center mb-6 ${headingColor}`}>
           {headingText}
         </p>

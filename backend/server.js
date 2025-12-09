@@ -4,7 +4,11 @@ import cors from 'cors';
 import pkg from 'pg'; 
 import summaryRoutes from './routes/Summary.js';
 import authRoutes from './routes/authRoutes.js';
+
 import transactionsRoutes from './routes/Transactions.js';
+
+import dashboardRoutes from './routes/dashboardRoutes.js';
+
 
 const { Pool } = pkg; 
 
@@ -19,8 +23,10 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/api/summary', summaryRoutes);
+
 app.use('/api/auth', authRoutes);
-app.use('/api/transactions', transactionsRoutes); 
+app.use('/api/transactions', transactionsRoutes);
+app.use('/api/dashboard', dashboardRoutes); 
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL, 
@@ -34,25 +40,11 @@ pool.connect()
   .catch(err => console.error('Database connection error:', err));
 
 
+
+
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
-// Test DB Route
-app.get('/test-db', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ message: 'Database Connected', time: result.rows[0].now });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
-
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
-
-export default app;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

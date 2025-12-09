@@ -27,6 +27,7 @@ const SignIn = () => {
 
       const data = await res.json();
 
+
       if (!res.ok) {
         setMessage(data.message || "Login failed");
 
@@ -39,22 +40,29 @@ const SignIn = () => {
         return;
       }
 
-      // ⭐ SUCCESS MESSAGE FIXED
+      //  SUCCESS MESSAGE FIXED
       setHeadingText("Signed in successfully!");
       setHeadingColor("text-green-500");
       setMessage("");
 
       localStorage.setItem('token', data.token);
+      localStorage.setItem('userType', data.Type);
+
+      console.log("User Type:", localStorage.getItem('userType'));
 
 
-      // ⭐ DELAY 450ms BEFORE REDIRECT
+      //  DELAY 450ms BEFORE REDIRECT
       setTimeout(() => {
         if (loginType.toLowerCase() === "personal") {
           navigate("/dashboard");
         } else if (loginType.toLowerCase() === "business") {
           navigate("/dashboard-business");
+        } else {
+          // Fallback
+          navigate("/dashboard");
         }
       }, 450);
+
 
     } catch (err) {
       setMessage("Something went wrong. Try again.");
@@ -91,7 +99,7 @@ const SignIn = () => {
           <span className="text-green-500">Pal</span>
         </h1>
 
-        {/* ⭐ Dynamic heading */}
+        {/*  Dynamic heading */}
         <p className={`text-center mb-6 ${headingColor}`}>
           {headingText}
         </p>
@@ -189,4 +197,7 @@ const SignIn = () => {
   );
 };
 
+
 export default SignIn;
+
+
