@@ -5,13 +5,15 @@ import FirstPage from './components/FirstPage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
-import AddExpenses from './pages/AddExpenses-business'; // Business expenses
-import AddExpense from './pages/AddExpense'; // Personal expenses
-
+//import AddExpenses from './pages/AddExpenses-business'; // Business expenses
+import AddExpenses from './pages/AddExpense'; //name error you have added AddEpense that should be AddExpenses
 import Summary from './pages/Summary';
+//import { useTheme } from './context/ThemeContext';
 
 function AppContent() {
   const location = useLocation();
+  //const { theme } = useTheme();
+  //const isDarkMode = theme === 'dark';
 
   // Hide Navbar on these routes
   const hideNavbarRoutes = ['/', '/signin', '/signup'];
@@ -25,11 +27,8 @@ function AppContent() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard />} />
-
-        {/* TEMPORARY: Swap these to test AddExpense.jsx */}
-        <Route path="/add-expenses" element={<AddExpense />} /> {/* Now shows personal expenses */}
-        <Route path="/add-expense-business" element={<AddExpenses />} /> {/* Moved business to new route */}
-        
+        <Route path="/add-expenses" element={<AddExpenses />} /> {/*That name error 's' when you merge add 's' letter*/}
+     {/*<Route path="/add-expenses-business" element={<AddExpensesBusiness />} /> */}
         <Route path="/summary" element={<Summary />} />
       </Routes>
     </div>
