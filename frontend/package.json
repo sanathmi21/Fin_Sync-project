@@ -12,11 +12,8 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.17",
     "@tailwindcss/vite": "^4.1.17",
-<<<<<<< HEAD
     "framer-motion": "^12.23.25",
-=======
     "axios": "^1.13.2",
->>>>>>> feature/add-expenses
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
     "lucide-react": "^0.555.0",
