@@ -46,7 +46,7 @@ const SignIn = () => {
       setMessage("");
 
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userType', data.Type);
+      localStorage.setItem('userType', data.user.Type);
 
       console.log("User Type:", localStorage.getItem('userType'));
 
@@ -56,7 +56,7 @@ const SignIn = () => {
         if (loginType.toLowerCase() === "personal") {
           navigate("/dashboard");
         } else if (loginType.toLowerCase() === "business") {
-          navigate("/dashboard");
+          navigate("/dashboard-business");
         } else {
           // Fallback
           navigate("/dashboard");
@@ -199,5 +199,3 @@ const SignIn = () => {
 
 
 export default SignIn;
-
-

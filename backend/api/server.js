@@ -6,6 +6,9 @@ import summaryRoutes from '../routes/Summary.js';
 import authRoutes from '../routes/authRoutes.js';
 import transactionsRoutes from '../routes/Transactions.js';
 import dashboardRoutes from '../routes/dashboardRoutes.js';
+import expenseRoutes from '../routes/expenseRoutes.js'; // NEW ADDED
+import incomeRoutes from '../routes/incomeRoutes.js';   // NEW ADDED
+import verifyToken from '../middleware/Auth.js';        // NEW ADDED
 
 const { Pool } = pkg;
 
@@ -29,6 +32,8 @@ app.use('/api/summary', summaryRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/expenses', verifyToken, expenseRoutes); // NEW ADDED
+app.use('/api/income', verifyToken, incomeRoutes);    // NEW ADDED
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -42,6 +47,37 @@ pool.connect()
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
+
+//------------------NEW ADDED TEST ROUTES----------------------------------
+
+app.get('/test-db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json({ message: 'Database Connected', time: result.rows[0].now });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
+//-----------NEW ADDED SERVER LISTENING FOR DEVELOPMENT--------------------
+
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+    console.log(`API Base: http://localhost:${PORT}/api`);
+  });
+}
 
 //Export as Vercel function handler
 export default app;

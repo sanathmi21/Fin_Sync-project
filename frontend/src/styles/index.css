@@ -6,3 +6,171 @@ body {
   font-family: Arial, sans-serif;
   transition: background-color 0.3s, color 0.3s;
 }
+
+/* FIXED: Only apply transitions to specific elements, not ALL */
+/* This is the SAFE version that won't break your logout button */
+.bg-transition,
+.text-transition,
+.border-transition {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* OR use a more specific selector that won't override button hovers */
+html, body, div, section, article, main, header, footer, 
+nav, aside, form, input, textarea, select, label, 
+table, thead, tbody, tr, th, td,
+.dark-mode-transition {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Custom scrollbar styles (optional, won't break anything) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* IMPORTANT: Add this to ensure logout button hover works correctly */
+/* This gives your button styles higher specificity */
+.bg-gray-100:hover,
+.dark\:bg-\[\#444\]:hover {
+  transition-property: background-color, color !important;
+  transition-duration: 300ms !important;
+  transition-timing-function: ease-in-out !important;
+}
+
+/* Specifically target the logout button hover */
+.hover\:bg-\[\#EFB506\]:hover {
+  background-color: #EFB506 !important;
+  color: #111 !important;
+  transition: all 0.3s ease-in-out !important;
+}
+
+/* Dark mode utility classes - only add what's missing */
+.dark .dark\:border-\[\#333\] {
+  border-color: #333;
+}
+
+.dark .dark\:border-\[\#444\] {
+  border-color: #444;
+}
+
+.dark .dark\:bg-\[\#111\] {
+  background-color: #111;
+}
+
+.dark .dark\:bg-\[\#1a1a1a\] {
+  background-color: #1a1a1a;
+}
+
+.dark .dark\:bg-\[\#222\] {
+  background-color: #222;
+}
+
+.dark .dark\:bg-\[\#333\] {
+  background-color: #333;
+}
+
+.dark .dark\:bg-\[\#444\] {
+  background-color: #444;
+}
+
+.dark .dark\:text-white {
+  color: #fff;
+}
+
+.dark .dark\:text-gray-300 {
+  color: #d1d5db;
+}
+
+.dark .dark\:text-gray-400 {
+  color: #9ca3af;
+}
+
+/* Add to your existing index.css file */
+
+/* Custom thin scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Vertical scrollbar for tables */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
