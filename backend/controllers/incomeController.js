@@ -1,4 +1,4 @@
-import pool from '../db.js';
+import {pool} from '../db.js';
 import Income from '../models/Income.js';
 import Expense from '../models/Expense.js';
 
