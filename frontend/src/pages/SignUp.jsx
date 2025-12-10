@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -8,17 +8,24 @@ const SignUp = () => {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [loginType, setLoginType] = useState("");
   const [pwd, setPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [message, setMessage] = useState("");
-  const [messageColor, setMessageColor] = useState("red"); 
+
+  const [messageColor, setMessageColor] = useState("red");
+
+  const [headingText, setHeadingText] = useState("Create an account");
+  const [headingColor, setHeadingColor] = useState("text-gray-300");
+
+  
+
 
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    // Password confirmation check
     if (pwd !== confirmPwd) {
       setMessage("Passwords do not match");
       setMessageColor("red");
@@ -33,46 +40,76 @@ const SignUp = () => {
           username: name,
           email,
           password: pwd,
+          type: loginType,
         }),
       });
 
       const data = await res.json();
-      console.log("SignUp response:", data);
 
       if (!res.ok) {
-        // Show backend message if signup failed
         setMessage(data.message || "Signup failed");
         setMessageColor("red");
+
+        // Keep inputs for retry — DO NOT clear on error
         return;
       }
 
-      // Success
-      setMessage(data.message || "Account created successfully!");
+      // SUCCESS STATE — FIXED
+      setHeadingText("Account created successfully!");
+      setHeadingColor("text-green-500");
+
+      setMessage("Account created successfully!");
       setMessageColor("green");
 
-      // Optional: wait 1 second before redirecting
-      setTimeout(() => navigate("/signin"), 1000);
+
+      // Delay redirect — FIXED TO 450ms
+      setTimeout(() => navigate("/signin"), 450);
+
+
     } catch (err) {
       console.error("SignUp fetch error:", err);
-      setMessage("Something went wrong. Please Try again.");
+      setMessage("Something went wrong. Please try again.");
       setMessageColor("red");
     }
   };
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef();
+
+  const options = ["Personal", "Business"];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-sm">
-
+        
         <h1 className="text-4xl font-bold text-center mb-2">
           <span className="text-yellow-400">Penny</span>
           <span className="text-green-500">Pal</span>
         </h1>
-        <p className="text-gray-300 text-center mb-6">Create an account</p>
 
-        {message && <p className="text-center text-red-400 mb-2">{message}</p>}
+        {/* Dynamic heading text */}
+        <p className={`text-center mb-6 ${headingColor}`}>
+          {headingText}
+        </p>
+
+        {message && (
+          <p className="text-center mb-2" style={{ color: messageColor }}>
+            {message}
+          </p>
+        )}
 
         <form className="space-y-4" onSubmit={handleSignUp}>
-          
+
           <div>
             <label className="text-gray-200 block mb-1">Name:</label>
             <input
@@ -97,6 +134,39 @@ const SignUp = () => {
             />
           </div>
 
+          <div ref={dropdownRef} className="relative">
+            <label className="text-gray-200 mb-1 block">Type of Account :</label>
+            <div
+              className="w-full p-2 bg-black text-white rounded-lg cursor-pointer flex justify-between items-center"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              {loginType || <span className="text-gray-400">Select account type</span>}
+              <span className="ml-2">▼</span>
+            </div>
+
+            <ul
+              className={`absolute w-full bg-black rounded-lg mt-1 shadow-lg z-10 max-h-40 overflow-auto transition-all duration-300 origin-top ${
+                dropdownOpen
+                  ? "scale-y-100 opacity-100"
+                  : "scale-y-0 opacity-0 pointer-events-none"
+              }`}
+              style={{ transformOrigin: "top" }}
+            >
+              {options.map((opt) => (
+                <li
+                  key={opt}
+                  className="p-2 hover:bg-gray-700 cursor-pointer text-white"
+                  onClick={() => {
+                    setLoginType(opt);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  {opt}
+                </li>
+              ))}
+            </ul>
+          </div>
+
           <div>
             <label className="text-gray-200 block mb-1">Password :</label>
             <div className="relative">
@@ -107,7 +177,6 @@ const SignUp = () => {
                 onChange={(e) => setPwd(e.target.value)}
                 required
               />
-
               <span
                 className="absolute right-3 top-2 cursor-pointer text-gray-400"
                 onClick={() => setShowPwd(!showPwd)}
@@ -127,7 +196,6 @@ const SignUp = () => {
                 onChange={(e) => setConfirmPwd(e.target.value)}
                 required
               />
-
               <span
                 className="absolute right-3 top-2 cursor-pointer text-gray-400"
                 onClick={() => setShowConfirmPwd(!showConfirmPwd)}
@@ -143,6 +211,7 @@ const SignUp = () => {
           >
             Sign Up
           </button>
+
         </form>
 
         <p className="text-center text-gray-300 mt-4">
@@ -151,6 +220,7 @@ const SignUp = () => {
             Sign in
           </Link>
         </p>
+
       </div>
     </div>
   );

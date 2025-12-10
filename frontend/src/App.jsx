@@ -5,7 +5,7 @@ import FirstPage from './components/FirstPage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
-//import AddExpenses from './pages/AddExpenses-business'; // Business expenses
+//import AddExpenses from './pages/AddExpenses-business'; // when you merge remove commet 
 import AddExpenses from './pages/AddExpense'; //name error you have added AddEpense that should be AddExpenses
 import Summary from './pages/Summary';
 //import { useTheme } from './context/ThemeContext';
