@@ -100,6 +100,50 @@ export const deleteExpense = async (req, res) => {
   }
 };
 
+// @desc    Update expense
+// @route   PUT /api/expenses/:id
+export const updateExpense = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, category, amount, date, description, highPriority } = req.body;
+
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
+      });
+    }
+
+    const userId = req.user.id;
+
+    // Prepare update data
+    const updateData = {};
+    if (name !== undefined) updateData.Ex_Name = name;
+    if (category !== undefined) updateData.Category = category;
+    if (amount !== undefined) updateData.Ex_Amount = amount;
+    if (date !== undefined) updateData.Ex_Date = date;
+    if (description !== undefined) updateData.Description = description;
+    if (highPriority !== undefined) updateData.HighPriority = highPriority;
+
+    // Use Expense model to update expense
+    const updatedExpense = await Expense.update(id, userId, updateData);
+
+    res.status(200).json({
+      success: true,
+      message: 'Expense updated successfully',
+      data: updatedExpense
+    });
+  } catch (error) {
+    console.error('❌ Error updating expense:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error while updating expense',
+      error: error.message
+    });
+  }
+};
+
 // @desc    Get all expenses for user
 // @route   GET /api/expenses
 export const getExpenses = async (req, res) => {

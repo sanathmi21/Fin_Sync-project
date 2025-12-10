@@ -136,6 +136,47 @@ export const deleteIncome = async (req, res) => {
   }
 };
 
+// @desc    Update income
+// @route   PUT /api/income/:id
+export const updateIncome = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, amount, date } = req.body;
+
+    // Use the authenticated user's ID from JWT token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated. Please login again.'
+      });
+    }
+
+    const userId = req.user.id;
+
+    // Prepare update data
+    const updateData = {};
+    if (name !== undefined) updateData.In_Name = name;
+    if (amount !== undefined) updateData.In_Amount = amount;
+    if (date !== undefined) updateData.In_Date = date;
+
+    // Use Income model to update income
+    const updatedIncome = await Income.update(id, userId, updateData);
+
+    res.status(200).json({
+      success: true,
+      message: 'Income updated successfully',
+      data: updatedIncome
+    });
+  } catch (error) {
+    console.error('❌ Error updating income:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error while updating income',
+      error: error.message
+    });
+  }
+};
+
 // @desc    Get financial summary
 // @route   GET /api/income/summary
 export const getFinancialSummary = async (req, res) => {

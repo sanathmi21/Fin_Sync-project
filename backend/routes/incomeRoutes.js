@@ -5,7 +5,8 @@ import {
   deleteIncome, 
   getFinancialSummary,
   getFinancialStatistics,
-  searchIncome 
+  searchIncome,
+  updateIncome
 } from '../controllers/incomeController.js';
 
 const router = express.Router();
@@ -13,6 +14,7 @@ const router = express.Router();
 router.post('/', addIncome);
 router.get('/', getIncome);
 router.delete('/:id', deleteIncome);
+router.put('/:id', updateIncome);
 router.get('/summary', getFinancialSummary);
 router.get('/statistics', getFinancialStatistics);
 router.get('/search', searchIncome);

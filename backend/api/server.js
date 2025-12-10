@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import pkg from 'pg';
 //import summaryRoutes from '../routes/Summary.js';
-//import authRoutes from '../routes/authRoutes.js';
+import authRoutes from '../routes/authRoutes.js';
 //import transactionsRoutes from '../routes/Transactions.js';
 //import dashboardRoutes from '../routes/dashboardRoutes.js';
 import expenseRoutes from '../routes/expenseRoutes.js'; // NEW ADDED
@@ -29,7 +29,7 @@ app.use(express.json());
 
 //Routes
 //app.use('/api/summary', summaryRoutes);
-//app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 //app.use('/api/transactions', transactionsRoutes);
 //app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/expenses', verifyToken, expenseRoutes); // NEW ADDED
