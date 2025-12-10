@@ -1,4 +1,4 @@
-import pool from '../db.js';
+import {pool} from '../db.js';
 
 class Expense {
   // Get all expenses for a user
