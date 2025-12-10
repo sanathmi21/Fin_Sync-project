@@ -1,4 +1,4 @@
-import pool from '../db.js';
+import {pool} from '../db.js';
 
 class Income {
   // Get all income for a user
