@@ -6,7 +6,7 @@ import verifyBusinessUser from "../middleware/verifyBusinessUser.js";
 
 const router = express.Router();
 
-// ----------------------- GET MONTHLY DATA -----------------------
+//GET MONTHLY DATA
 router.get("/monthly", verifyToken, async (req, res) => {
   try {
     const { year, month } = req.query;
@@ -55,7 +55,7 @@ router.get("/monthly", verifyToken, async (req, res) => {
   }
 });
 
-// ----------------------- ADD INCOME -----------------------
+//ADD INCOME
 router.post("/income", verifyToken, verifyBusinessUser, async (req, res) => {
   try {
     const { date, unitAmount, quantity } = req.body;
@@ -92,7 +92,7 @@ router.post("/income", verifyToken, verifyBusinessUser, async (req, res) => {
   }
 });
 
-// ----------------------- ADD EXPENSE -----------------------
+// ADD EXPENSE
 router.post("/expense", verifyToken, verifyBusinessUser, async (req, res) => {
   try {
     const { date, category, name, amount } = req.body;
@@ -126,7 +126,7 @@ router.post("/expense", verifyToken, verifyBusinessUser, async (req, res) => {
   }
 });
 
-// ----------------------- DELETE INCOME -----------------------
+// DELETE INCOME
 router.delete("/income/:id", verifyToken, async (req, res) => {
   try {
     const userID = req.user.id;
@@ -141,7 +141,7 @@ router.delete("/income/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ----------------------- DELETE EXPENSE -----------------------
+// DELETE EXPENSE 
 router.delete("/expense/:id", verifyToken, async (req, res) => {
   try {
     const userID = req.user.id;
@@ -156,7 +156,7 @@ router.delete("/expense/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ----------------------- VIEW TOTALS -----------------------
+//  VIEW TOTALS 
 router.get("/totals", verifyToken, async (req, res) => {
   try {
     const userID = req.user.id;
@@ -166,7 +166,7 @@ router.get("/totals", verifyToken, async (req, res) => {
       return res.status(400).json({ message: "Year and month are required" });
     }
 
-    const monthNum = Number(month) + 1; // JS months are 0-based
+    const monthNum = Number(month) + 1;
 
     const incomeSumQuery = `SELECT SUM("Busi_Total_Amount") AS total FROM "Income_Busi" WHERE "UserID" = $1 AND EXTRACT(YEAR FROM "Busi_In_Date") = $2 AND EXTRACT(MONTH FROM "Busi_In_Date") = $3`;
     const expenseSumQuery = `SELECT SUM("Busi_Ex_Amount") AS total FROM "Expenses_Busi" WHERE "UserID" = $1 AND EXTRACT(YEAR FROM "Busi_Ex_Date") = $2 AND EXTRACT(MONTH FROM "Busi_Ex_Date") = $3`;
