@@ -48,7 +48,10 @@ const SignIn = () => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('userType', data.user.Type);
 
-      console.log("User Type:", localStorage.getItem('userType'));
+      // After successful response
+      const userType = data.user?.Type || "";
+      localStorage.setItem('userType', userType);
+      console.log("User Type:", userType);
 
 
       //  DELAY 450ms BEFORE REDIRECT
@@ -56,7 +59,7 @@ const SignIn = () => {
         if (loginType.toLowerCase() === "personal") {
           navigate("/dashboard");
         } else if (loginType.toLowerCase() === "business") {
-          navigate("/dashboard-business");
+          navigate("/dashboard");
         } else {
           // Fallback
           navigate("/dashboard");
@@ -75,7 +78,7 @@ const SignIn = () => {
     }
   };
 
-  // ⭐ Custom Dropdown
+  // Custom Dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef();
   const options = ["Personal", "Business"];

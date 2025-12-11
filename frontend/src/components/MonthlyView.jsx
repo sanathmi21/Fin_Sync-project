@@ -33,13 +33,13 @@ const ChevronRightIcon = () => (
 );
 
 export default function MonthlyView() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [monthlyData, setMonthlyData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [currentDate, setCurrentDate] = useState(new Date()); // Current date state
+  const [monthlyData, setMonthlyData] = useState({}); // Data for the month
+  const [loading, setLoading] = useState(false); // Loading state
+  const [errorMsg, setErrorMsg] = useState(""); // Error message state
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const year = currentDate.getFullYear(); // Current year
+  const month = currentDate.getMonth(); // Current month (0-11)
   const monthNames = [
     "January",
     "February",
@@ -53,11 +53,11 @@ export default function MonthlyView() {
     "October",
     "November",
     "December",
-  ];
+  ]; 
 
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayIndex = new Date(year, month, 1).getDay();
-  const startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate(); // Total days in month
+  const firstDayIndex = new Date(year, month, 1).getDay(); // First day of month (0-6, Sun-Sat)
+  const startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // Adjust to make Mon=0, Sun=6
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,25 +65,30 @@ export default function MonthlyView() {
       setErrorMsg("");
 
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token"); // Get token from local storage
         if (!token) {
           setErrorMsg("Please login first.");
           setLoading(false);
           return;
         }
 
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; 
+        console.log('=== FRONTEND DEBUG ==='); // Debug log --------------------------------------------------------------------
+        console.log('Year:', year, 'Month:', month);
+        console.log('Fetching URL:', `${API_URL}/api/summary/monthly?year=${year}&month=${month + 1}`);
+       
         const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json", 
+          Authorization: `Bearer ${token}`, 
         };
 
         const res = await fetch(
-          `${API_URL}/api/summary/monthly?year=${year}&month=${month}`,
+          `${API_URL}/api/summary/monthly?year=${year}&month=${month + 1}`,
           { headers }
         );
 
-        const data = await res.json();
+        const data = await res.json(); 
+        console.log('Response data:', data);
 
         if (!res.ok) {
           throw new Error(data.error || "Backend error");
@@ -102,9 +107,9 @@ export default function MonthlyView() {
   }, [year, month]);
 
   const handlePrevMonth = () =>
-    setCurrentDate(new Date(year, month - 1, 1));
+    setCurrentDate(new Date(year, month - 1, 1)); // Go to previous month
   const handleNextMonth = () =>
-    setCurrentDate(new Date(year, month + 1, 1));
+    setCurrentDate(new Date(year, month + 1, 1)); // Go to next month
 
   return (
     <div className="bg-[#444] rounded-lg p-6 border border-[#555] shadow-lg min-h-[600px]">
