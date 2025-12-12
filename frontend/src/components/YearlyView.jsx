@@ -12,6 +12,7 @@ const ChevronRightIcon = ({ className }) => (
   </svg>
 );
 
+//Main YearlyView Component
 export default function YearlyView() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [yearlyData, setYearlyData] = useState([]);
@@ -21,6 +22,7 @@ export default function YearlyView() {
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const shortMonthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+  // Fetch yearly data when year changes
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);

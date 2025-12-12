@@ -7,8 +7,7 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* FIXED: Only apply transitions to specific elements, not ALL */
-/* This is the SAFE version that won't break your logout button */
+/* Transition classes for smooth theme changes */
 .bg-transition,
 .text-transition,
 .border-transition {
@@ -17,7 +16,7 @@ body {
   transition-duration: 150ms;
 }
 
-/* OR use a more specific selector that won't override button hovers */
+/* Apply transition to common elements */
 html, body, div, section, article, main, header, footer, 
 nav, aside, form, input, textarea, select, label, 
 table, thead, tbody, tr, th, td,
@@ -27,7 +26,7 @@ table, thead, tbody, tr, th, td,
   transition-duration: 150ms;
 }
 
-/* Custom scrollbar styles (optional, won't break anything) */
+/* Custom scrollbar styles */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -57,9 +56,7 @@ table, thead, tbody, tr, th, td,
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
-
-/* IMPORTANT: Add this to ensure logout button hover works correctly */
-/* This gives your button styles higher specificity */
+/* Smooth hover transitions for bg-gray-100 and dark:bg-[#444] */
 .bg-gray-100:hover,
 .dark\:bg-\[\#444\]:hover {
   transition-property: background-color, color !important;
@@ -74,7 +71,7 @@ table, thead, tbody, tr, th, td,
   transition: all 0.3s ease-in-out !important;
 }
 
-/* Dark mode utility classes - only add what's missing */
+/* Dark mode utility classes  */
 .dark .dark\:border-\[\#333\] {
   border-color: #333;
 }
@@ -115,9 +112,6 @@ table, thead, tbody, tr, th, td,
   color: #9ca3af;
 }
 
-/* Add to your existing index.css file */
-
-/* Custom thin scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
   height: 4px;
   width: 4px;
@@ -144,7 +138,6 @@ table, thead, tbody, tr, th, td,
   background: #6b7280;
 }
 
-/* Vertical scrollbar for tables */
 .overflow-y-auto::-webkit-scrollbar {
   width: 6px;
 }

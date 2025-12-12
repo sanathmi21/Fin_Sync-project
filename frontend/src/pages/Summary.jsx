@@ -23,7 +23,7 @@ const ChevronRightIcon = ({ className }) => (
   </svg>
 );
 
-
+// Function to dynamically load external scripts
 const loadScript = (src) => {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) {
@@ -46,6 +46,7 @@ export default function Summary() {
   const [libsLoaded, setLibsLoaded] = useState(false);
   const contentRef = useRef(null);
 
+  // Load html-to-image and jsPDF libraries dynamically
   useEffect(() => {
     const loadLibs = async () => {
       try {
@@ -63,6 +64,7 @@ export default function Summary() {
     loadLibs();
   }, []);
 
+  // PDF Download Handler
   const handleDownloadPDF = async () => {
     const element = contentRef.current;
     if (!element) return;
@@ -129,7 +131,7 @@ export default function Summary() {
               disabled={!libsLoaded || isDownloading}
               className={`flex items-center justify-center gap-2 bg-green-600 text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-green-700 transition-all shadow-md active:scale-95 ${(isDownloading || !libsLoaded) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {/* Replaced FiDownload with inline DownloadIcon */}
+              {/* RepFiDownload with inline DownloadIcon */}
               <DownloadIcon className="w-5 h-5" /> 
               {isDownloading ? 'Generating...' : 'Download PDF'}
             </button>

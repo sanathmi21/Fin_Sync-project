@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -9,6 +10,7 @@ const verifyToken = (req, res, next) => {
   console.log('Auth Header:', authHeader);
   console.log('Token:', token ? token.substring(0, 20) + '...' : 'No token');
 
+  // Check if token is present
   if (!token) {
     console.log('No token provided');
     return res.status(401).json({ error: "Access Denied. No token provided." });

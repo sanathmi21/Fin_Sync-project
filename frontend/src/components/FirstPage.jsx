@@ -35,7 +35,7 @@ export default function FirstPage() {
         manage budgets, and achieve financial freedom.
       </p>
 
-      {/* GET STARTED button → SignIn */}
+      {/* Get Started Button to SignIn */}
       <button
         onClick={() => navigate("/signin")}
         className="bg-[#EFB506] hover:bg-[#d7a004] text-black font-semibold px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg mb-14 transition-all duration-300 hover:scale-105"
@@ -99,7 +99,7 @@ export default function FirstPage() {
         </p>
       </div>
 
-      {/* Start Your Journey → SignIn */}
+      {/* Start Your Journey to SignIn */}
       <button
         onClick={() => navigate("/signin")}
         className="bg-[#EFB506] hover:bg-[#d7a004] text-black font-semibold px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"

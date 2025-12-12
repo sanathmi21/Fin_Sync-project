@@ -10,13 +10,6 @@ router.get('/monthly', verifyToken, async (req, res) => {
   const userId = req.user.id || req.user.UserID;
   const userType = (req.user.type || req.user.userType || 'personal').toLowerCase(); 
 
-
-  // ADD THESE DEBUG LOGS--------------------------------------------------------------------------------------------
-  console.log('=== MONTHLY SUMMARY DEBUG ===');
-  console.log('User ID:', userId);
-  console.log('User Type:', userType);
-  console.log('Year:', year, 'Month:', month);
-
   // Validate month
   const monthNumber = parseInt(month);
   if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
@@ -27,6 +20,7 @@ router.get('/monthly', verifyToken, async (req, res) => {
     let incomeQuery, expenseQuery;
     let params = [userId, year, monthNumber];
 
+    // Adjust queries based on user type
     if (userType === 'business') {
       incomeQuery = `
         SELECT DATE("Busi_In_Date") AS date, SUM("Busi_Total_Amount") AS total_income
@@ -70,19 +64,17 @@ router.get('/monthly', verifyToken, async (req, res) => {
     const [incomeRes, expenseRes] = await Promise.all([
       pool.query(incomeQuery, params),
       pool.query(expenseQuery, params)
-    ]);
-
-    // ADD THESE DEBUG LOGS--------------------------------------------------------------------------------------------
-    console.log('Income rows:', incomeRes.rows);
-    console.log('Expense rows:', expenseRes.rows);
+    ])
 
     const monthlyData = {};
 
+    // Combine income and expense data by date
     incomeRes.rows.forEach(row => {
       const day = new Date(row.date).getDate();
       monthlyData[day] = { income: parseFloat(row.total_income), expense: 0 };
     });
 
+    // Add expense data
     expenseRes.rows.forEach(row => {
       const day = new Date(row.date).getDate();
       if (!monthlyData[day]) monthlyData[day] = { income: 0, expense: 0 };
@@ -108,6 +100,7 @@ router.get('/yearly', verifyToken, async (req, res) => {
     let incomeQuery, expenseQuery;
     let params = [userId, year];
 
+    // Adjust queries based on user type
     if (userType === 'business') {
       incomeQuery = `
         SELECT EXTRACT (MONTH FROM "Busi_In_Date")::int AS month, SUM("Busi_Total_Amount") AS total_income
@@ -145,6 +138,7 @@ router.get('/yearly', verifyToken, async (req, res) => {
       pool.query(expenseQuery, params)
     ]);
 
+    // Initialize yearly data with zeros for all months
     const yearlyData = Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
 
     incomeRes.rows.forEach(row => {

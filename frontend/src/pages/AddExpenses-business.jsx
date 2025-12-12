@@ -60,7 +60,8 @@ export default function AddExpenses() {
     const headers = {
       'Content-Type': 'application/json'
     };
-    // Use template literal or concatenation so token is inserted correctly
+    
+    // Attach token if available
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -72,7 +73,7 @@ export default function AddExpenses() {
     try { return await res.json(); } catch { return null; }
   };
 
-  // ------------------ FETCH DATA ------------------
+  //FETCH DATA
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -100,7 +101,7 @@ export default function AddExpenses() {
     }
   };
 
-  // ------------------ FETCH TOTALS ------------------
+  //FETCH TOTALS
   const fetchTotals = async () => {
     try {
       const year = currentDate.getFullYear();
@@ -128,7 +129,7 @@ export default function AddExpenses() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ------------------ INCOME ------------------
+  //INCOME 
   const handleAddIncome = async () => {
     if (!incForm.date || !incForm.unitAmount) return;
 
@@ -164,7 +165,7 @@ export default function AddExpenses() {
     }
   };
 
-  // ------------------ EXPENSE ------------------
+  // EXPENSE
   const handleAddExpense = async () => {
     if (!expForm.date || !expForm.amount || !expForm.name) return;
 
@@ -200,7 +201,7 @@ export default function AddExpenses() {
     }
   };
 
-  // ------------------ DELETE ------------------
+  // DELETE
   const handleDelete = async (type, id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
@@ -239,13 +240,13 @@ export default function AddExpenses() {
             const newMonth = now.getMonth();
             const newYear = now.getFullYear();
 
-            // If still same month → No refresh allowed
+            // Prevent redundant refreshes
             if (oldMonth === newMonth && oldYear === newYear) {
               alert("Please click at the end of the month");
               return;
             }
 
-            // If month or year changed → Reset UI data for new month
+            // Update date to current
             setCurrentDate(now);
             setIncomes([]);
             setExpenses([]);

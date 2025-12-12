@@ -4,7 +4,7 @@ import Expense from '../models/Expense.js';
 // @desc    Add new expense
 // @route   POST /api/expenses
 export const addExpense = async (req, res) => {
-  console.log('📝 Add Expense Request:', req.body);
+  console.log('Add Expense Request:', req.body);
   
   try {
     const { name, category, amount, date, description, highPriority } = req.body;
@@ -34,7 +34,7 @@ export const addExpense = async (req, res) => {
 
     const userId = req.user.id;
     
-    console.log(`💰 Creating expense for UserID: ${userId}`);
+    console.log(`Creating expense for UserID: ${userId}`);
 
     // Use Expense model to create expense
     const expenseData = {
@@ -48,7 +48,7 @@ export const addExpense = async (req, res) => {
     };
 
     const newExpense = await Expense.create(expenseData);
-    console.log('✅ Expense created successfully:', newExpense);
+    console.log('Expense created successfully:', newExpense);
 
     res.status(201).json({
       success: true,
@@ -57,7 +57,7 @@ export const addExpense = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error adding expense:', error);
+    console.error('Error adding expense:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Server error while adding expense',
@@ -91,7 +91,7 @@ export const deleteExpense = async (req, res) => {
       data: deletedExpense
     });
   } catch (error) {
-    console.error('❌ Error deleting expense:', error);
+    console.error('Error deleting expense:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Server error while deleting expense',
@@ -135,7 +135,7 @@ export const updateExpense = async (req, res) => {
       data: updatedExpense
     });
   } catch (error) {
-    console.error('❌ Error updating expense:', error);
+    console.error('Error updating expense:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Server error while updating expense',
@@ -147,7 +147,7 @@ export const updateExpense = async (req, res) => {
 // @desc    Get all expenses for user
 // @route   GET /api/expenses
 export const getExpenses = async (req, res) => {
-  console.log('📋 Get Expenses Request');
+  console.log('Get Expenses Request');
   
   try {
     // Use the authenticated user's ID from JWT token
@@ -160,12 +160,12 @@ export const getExpenses = async (req, res) => {
 
     const userId = req.user.id;
     
-    console.log(`📊 Fetching expenses for UserID: ${userId}`);
+    console.log(`Fetching expenses for UserID: ${userId}`);
 
     // Use Expense model to get expenses
     const expenses = await Expense.getAllByUser(userId);
 
-    console.log(`📊 Found ${expenses.length} expenses for user ${userId}`);
+    console.log(`Found ${expenses.length} expenses for user ${userId}`);
 
     res.status(200).json({
       success: true,
@@ -173,7 +173,7 @@ export const getExpenses = async (req, res) => {
       data: expenses
     });
   } catch (error) {
-    console.error('❌ Error getting expenses:', error);
+    console.error('Error getting expenses:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching expenses',
@@ -205,7 +205,7 @@ export const getHighPriorityExpenses = async (req, res) => {
       data: highPriorityExpenses
     });
   } catch (error) {
-    console.error('❌ Error getting high priority expenses:', error);
+    console.error('Error getting high priority expenses:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching high priority expenses'
@@ -245,7 +245,7 @@ export const searchExpenses = async (req, res) => {
       data: expenses
     });
   } catch (error) {
-    console.error('❌ Error searching expenses:', error);
+    console.error('Error searching expenses:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while searching expenses',

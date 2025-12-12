@@ -32,6 +32,7 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
+//Main MonthlyView Component
 export default function MonthlyView() {
   const [currentDate, setCurrentDate] = useState(new Date()); // Current date state
   const [monthlyData, setMonthlyData] = useState({}); // Data for the month
@@ -59,6 +60,7 @@ export default function MonthlyView() {
   const firstDayIndex = new Date(year, month, 1).getDay(); // First day of month (0-6, Sun-Sat)
   const startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1; // Adjust to make Mon=0, Sun=6
 
+  // Fetch monthly data when year or month changes
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -72,16 +74,15 @@ export default function MonthlyView() {
           return;
         }
 
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; 
-        console.log('=== FRONTEND DEBUG ==='); // Debug log --------------------------------------------------------------------
-        console.log('Year:', year, 'Month:', month);
-        console.log('Fetching URL:', `${API_URL}/api/summary/monthly?year=${year}&month=${month + 1}`);
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; // Backend URL
        
+        // Set up headers with authorization
         const headers = {
           "Content-Type": "application/json", 
           Authorization: `Bearer ${token}`, 
         };
 
+        // Fetch monthly summary data
         const res = await fetch(
           `${API_URL}/api/summary/monthly?year=${year}&month=${month + 1}`,
           { headers }
