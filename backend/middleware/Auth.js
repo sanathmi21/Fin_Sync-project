@@ -2,36 +2,43 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
+// Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
+
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+
+  // Check if token is present
+  if (!token) {
+    console.log('No token provided');
+    return res.status(401).json({ error: "Access Denied. No token provided." });
+  }
+
   try {
-    const authHeader = req.headers.authorization;
+    const verified = jwt.verify(token, process.env.JWT_SECRET || 'mysecretkey');
+    console.log('Token verified for user:', verified.id);
+    
+    if (!verified.id) {
+      console.log('Token missing id field');
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "No token provided" });
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({ error: "No token provided" });
-    }
-
-    // Verify JWT
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Make sure token contains user id
-    if (!decoded || !decoded.id) {
       return res.status(400).json({ error: "Invalid token payload" });
     }
 
-    req.user = decoded; // attach decoded token to req
+    req.user = verified;
     next();
   } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return res.status(401).json({ error: "Token expired" });
+
+    console.error("JWT verification error:", err.message);
+    if (err.name === 'TokenExpiredError') {
+      res.status(401).json({ error: "Token expired. Please login again." });
+    } else if (err.name === 'JsonWebTokenError') {
+      res.status(400).json({ error: "Invalid token" });
+    } else {
+      res.status(400).json({ error: "Invalid Token" });
+
     }
 
-    return res.status(400).json({ error: "Invalid token" });
   }
 };
 

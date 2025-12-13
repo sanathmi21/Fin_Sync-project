@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// SignIn Component
 const SignIn = () => {
   const navigate = useNavigate();
 
@@ -19,6 +20,7 @@ const SignIn = () => {
     e.preventDefault();
 
     try {
+      // API CALL
       const res = await fetch(`${API_URL}/api/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,7 +29,7 @@ const SignIn = () => {
 
       const data = await res.json();
 
-
+      // ERROR HANDLING
       if (!res.ok) {
         setMessage(data.message || "Login failed");
 
@@ -40,7 +42,7 @@ const SignIn = () => {
         return;
       }
 
-      //  SUCCESS MESSAGE FIXED
+      // On success
       setHeadingText("Signed in successfully!");
       setHeadingColor("text-green-500");
       setMessage("");
@@ -48,7 +50,10 @@ const SignIn = () => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('userType', data.user.Type);
 
-      console.log("User Type:", localStorage.getItem('userType'));
+      // Store user type separately
+      const userType = data.user?.Type || "";
+      localStorage.setItem('userType', userType);
+      console.log("User Type:", userType);
 
 
       //  DELAY 450ms BEFORE REDIRECT
@@ -56,7 +61,7 @@ const SignIn = () => {
         if (loginType.toLowerCase() === "personal") {
           navigate("/dashboard");
         } else if (loginType.toLowerCase() === "business") {
-          navigate("/dashboard-business");
+          navigate("/dashboard");
         } else {
           // Fallback
           navigate("/dashboard");
@@ -75,7 +80,7 @@ const SignIn = () => {
     }
   };
 
-  // ⭐ Custom Dropdown
+  // Custom Dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef();
   const options = ["Personal", "Business"];

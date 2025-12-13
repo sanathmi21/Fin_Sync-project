@@ -240,7 +240,7 @@ const AddExpense = () => {
         setExpenses(response.data.data);
       }
     } catch (error) {
-      console.error('❌ Error fetching expenses:', error);
+      console.error('Error fetching expenses:', error);
       if (error.response?.status === 401) {
         setMessage({ type: 'error', text: 'Session expired. Please login again.' });
       }
@@ -256,7 +256,7 @@ const AddExpense = () => {
         setIncomes(response.data.data);
       }
     } catch (error) {
-      console.error('❌ Error fetching income:', error);
+      console.error('Error fetching income:', error);
       if (error.response?.status === 401) {
         setIncomeMessage({ type: 'error', text: 'Session expired. Please login again.' });
       }
@@ -963,7 +963,7 @@ const AddExpense = () => {
                     </div>
                   </>
                 ) : modal.type === 'editExpense' ? (
-                  // Edit Expense Form - Professional compact design
+                  // Edit Expense Form Content
                   <form onSubmit={handleEditExpense} className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                       <div>

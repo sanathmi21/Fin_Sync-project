@@ -5,7 +5,7 @@ import Expense from '../models/Expense.js';
 // @desc    Add new income
 // @route   POST /api/income
 export const addIncome = async (req, res) => {
-  console.log('📝 Add Income Request:', req.body);
+  console.log('Add Income Request:', req.body);
   
   try {
     const { name, amount, date } = req.body;
@@ -35,7 +35,7 @@ export const addIncome = async (req, res) => {
 
     const userId = req.user.id;
     
-    console.log(`💰 Creating income for UserID: ${userId}`);
+    console.log(`Creating income for UserID: ${userId}`);
 
     // Use Income model to create income
     const incomeData = {
@@ -46,7 +46,7 @@ export const addIncome = async (req, res) => {
     };
 
     const newIncome = await Income.create(incomeData);
-    console.log('✅ Income created successfully:', newIncome);
+    console.log('Income created successfully:', newIncome);
 
     res.status(201).json({
       success: true,
@@ -55,7 +55,7 @@ export const addIncome = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error adding income:', error);
+    console.error('Error adding income:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Server error while adding income',
@@ -67,7 +67,7 @@ export const addIncome = async (req, res) => {
 // @desc    Get all income for user
 // @route   GET /api/income
 export const getIncome = async (req, res) => {
-  console.log('📋 Get Income Request');
+  console.log('Get Income Request');
   
   try {
     // Use the authenticated user's ID from JWT token
@@ -80,12 +80,12 @@ export const getIncome = async (req, res) => {
 
     const userId = req.user.id;
     
-    console.log(`📊 Fetching income for UserID: ${userId}`);
+    console.log(`Fetching income for UserID: ${userId}`);
 
     // Use Income model to get income
     const incomeRecords = await Income.getAllByUser(userId);
 
-    console.log(`📊 Found ${incomeRecords.length} income records for user ${userId}`);
+    console.log(`Found ${incomeRecords.length} income records for user ${userId}`);
 
     res.status(200).json({
       success: true,
@@ -93,7 +93,7 @@ export const getIncome = async (req, res) => {
       data: incomeRecords
     });
   } catch (error) {
-    console.error('❌ Error getting income:', error);
+    console.error('Error getting income:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching income',
@@ -127,7 +127,7 @@ export const deleteIncome = async (req, res) => {
       data: deletedIncome
     });
   } catch (error) {
-    console.error('❌ Error deleting income:', error);
+    console.error('Error deleting income:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Server error while deleting income',
@@ -168,7 +168,7 @@ export const updateIncome = async (req, res) => {
       data: updatedIncome
     });
   } catch (error) {
-    console.error('❌ Error updating income:', error);
+    console.error('Error updating income:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Server error while updating income',
@@ -212,7 +212,7 @@ export const getFinancialSummary = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Error getting financial summary:', error);
+    console.error('Error getting financial summary:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching financial summary',
@@ -259,7 +259,7 @@ export const getFinancialStatistics = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('❌ Error getting financial statistics:', error);
+    console.error('Error getting financial statistics:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while fetching financial statistics',
@@ -300,7 +300,7 @@ export const searchIncome = async (req, res) => {
       data: incomeRecords
     });
   } catch (error) {
-    console.error('❌ Error searching income:', error);
+    console.error('Error searching income:', error);
     res.status(500).json({
       success: false,
       message: 'Server error while searching income',

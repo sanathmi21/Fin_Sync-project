@@ -8,8 +8,6 @@ const JWT_SECRET = process.env.JWT_SECRET || "mysecretkey";
 const JWT_EXPIRES_IN = "7d";
 
 
-
-
 //SIGN UP
 export const registerUser = async (req, res) => {
   const { username, email, password, type } = req.body;  //  ADDED type
@@ -33,7 +31,7 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // ⭐ INSERT TYPE INTO DATABASE
+    //  INSERT TYPE INTO DATABASE
     const result = await pool.query(
 
       `INSERT INTO "Users" ("UserName", "Email", "Password", "Type")
@@ -106,11 +104,6 @@ export const loginUser = async (req, res) => {
         Type: user.Type,
       },
     });
-
-
-    
-
-    
 
   } catch (err) {
     console.error(err);

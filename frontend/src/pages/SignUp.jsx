@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// SignUp Component
 const SignUp = () => {
   const navigate = useNavigate();
 
@@ -49,12 +50,11 @@ const SignUp = () => {
       if (!res.ok) {
         setMessage(data.message || "Signup failed");
         setMessageColor("red");
-
-        // Keep inputs for retry — DO NOT clear on error
+        
         return;
       }
 
-      // SUCCESS STATE — FIXED
+      // On success
       setHeadingText("Account created successfully!");
       setHeadingColor("text-green-500");
 

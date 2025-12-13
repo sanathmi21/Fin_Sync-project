@@ -1,4 +1,3 @@
-// backend/routes/transactions.js
 import express from "express";
 import {pool} from "../db.js";
 import verifyToken from "../middleware/Auth.js";
@@ -6,7 +5,7 @@ import verifyBusinessUser from "../middleware/verifyBusinessUser.js";
 
 const router = express.Router();
 
-// ----------------------- GET MONTHLY DATA -----------------------
+//GET MONTHLY DATA
 router.get("/monthly", verifyToken, async (req, res) => {
   try {
     const { year, month } = req.query;
@@ -14,6 +13,7 @@ router.get("/monthly", verifyToken, async (req, res) => {
 
     const monthNum = Number(month) + 1;
 
+    // FETCH INCOMES AND EXPENSES
     const incomesQuery = `
       SELECT 
         "IncomeBID" AS id,
@@ -55,7 +55,7 @@ router.get("/monthly", verifyToken, async (req, res) => {
   }
 });
 
-// ----------------------- ADD INCOME -----------------------
+//ADD INCOME
 router.post("/income", verifyToken, verifyBusinessUser, async (req, res) => {
   try {
     const { date, unitAmount, quantity } = req.body;
@@ -68,6 +68,7 @@ router.post("/income", verifyToken, verifyBusinessUser, async (req, res) => {
     const qty = Number(quantity) || 1;
     const total = Number(unitAmount) * qty;
 
+    // Insert income into database
     const insertQuery = `
       INSERT INTO "Income_Busi" 
         ("Busi_In_Date", "Busi_Unit_Amount", "Quantity", "Busi_Total_Amount", "UserID")
@@ -78,6 +79,7 @@ router.post("/income", verifyToken, verifyBusinessUser, async (req, res) => {
     const result = await pool.query(insertQuery, [date, unitAmount, qty, total, userID]);
     const insertedIncome = result.rows[0];
 
+    // Respond with the inserted income
     res.status(201).json({
       id: insertedIncome.IncomeBID,
       date: insertedIncome.Busi_In_Date,
@@ -92,7 +94,7 @@ router.post("/income", verifyToken, verifyBusinessUser, async (req, res) => {
   }
 });
 
-// ----------------------- ADD EXPENSE -----------------------
+// ADD EXPENSE
 router.post("/expense", verifyToken, verifyBusinessUser, async (req, res) => {
   try {
     const { date, category, name, amount } = req.body;
@@ -102,6 +104,7 @@ router.post("/expense", verifyToken, verifyBusinessUser, async (req, res) => {
       return res.status(400).json({ message: "Date, name, and amount are required" });
     }
 
+    // Insert expense into database
     const insertQuery = `
       INSERT INTO "Expenses_Busi"
         ("Busi_Ex_Date", "Busi_Ex_Category", "Busi_Ex_Name", "Busi_Ex_Amount", "UserID")
@@ -112,6 +115,7 @@ router.post("/expense", verifyToken, verifyBusinessUser, async (req, res) => {
     const result = await pool.query(insertQuery, [date, category || null, name, amount, userID]);
     const insertedExpense = result.rows[0];
 
+    // Respond with the inserted expense
     res.status(201).json({
       id: insertedExpense.ExpenseBID,
       date: insertedExpense.Busi_Ex_Date,
@@ -126,7 +130,7 @@ router.post("/expense", verifyToken, verifyBusinessUser, async (req, res) => {
   }
 });
 
-// ----------------------- DELETE INCOME -----------------------
+// DELETE INCOME
 router.delete("/income/:id", verifyToken, async (req, res) => {
   try {
     const userID = req.user.id;
@@ -141,7 +145,7 @@ router.delete("/income/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ----------------------- DELETE EXPENSE -----------------------
+// DELETE EXPENSE 
 router.delete("/expense/:id", verifyToken, async (req, res) => {
   try {
     const userID = req.user.id;
@@ -156,7 +160,7 @@ router.delete("/expense/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ----------------------- VIEW TOTALS -----------------------
+//  VIEW TOTALS 
 router.get("/totals", verifyToken, async (req, res) => {
   try {
     const userID = req.user.id;
@@ -166,8 +170,9 @@ router.get("/totals", verifyToken, async (req, res) => {
       return res.status(400).json({ message: "Year and month are required" });
     }
 
-    const monthNum = Number(month) + 1; // JS months are 0-based
+    const monthNum = Number(month) + 1;
 
+    // FETCH TOTALS
     const incomeSumQuery = `SELECT SUM("Busi_Total_Amount") AS total FROM "Income_Busi" WHERE "UserID" = $1 AND EXTRACT(YEAR FROM "Busi_In_Date") = $2 AND EXTRACT(MONTH FROM "Busi_In_Date") = $3`;
     const expenseSumQuery = `SELECT SUM("Busi_Ex_Amount") AS total FROM "Expenses_Busi" WHERE "UserID" = $1 AND EXTRACT(YEAR FROM "Busi_Ex_Date") = $2 AND EXTRACT(MONTH FROM "Busi_Ex_Date") = $3`;
 

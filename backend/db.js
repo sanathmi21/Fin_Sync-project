@@ -16,11 +16,8 @@ export const pool = new Pool({
 });
 
 
-(async () => {
-  try {
-    await pool.query("SELECT NOW()");
-    console.log("🌐 Connected to NEON PostgreSQL Database!");
-  } catch (err) {
-    console.error("❌ Database connection error:", err.message);
-  }
-})();
+// Test database connection
+pool.connect()
+  .then(() => console.log("Connected to NEON PostgreSQL Database!"))
+  .catch(err => console.error("Database connection error:", err));
+

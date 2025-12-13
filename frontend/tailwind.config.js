@@ -5,9 +5,9 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  // Extend the default theme
   theme: {
     extend: {
-      // Add only these extensions - they won't break existing styles
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
@@ -22,12 +22,6 @@ export default {
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
       },
-      colors: {
-        // Optional: Add custom colors if needed
-      },
-      boxShadow: {
-        // Optional: Add custom shadows
-      }
     },
   },
   plugins: [],

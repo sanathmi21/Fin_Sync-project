@@ -1,216 +1,117 @@
-import React, { useState, useEffect } from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import React, { useState, useEffect } from 'react';
 
+const ChevronLeftIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+);
+
+const ChevronRightIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+);
+
+//Main YearlyView Component
 export default function YearlyView() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [yearlyData, setYearlyData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
 
   const year = currentDate.getFullYear();
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const shortMonthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const shortMonthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+  // Fetch yearly data when year changes
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      setErrorMsg("");
-
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setErrorMsg("Please login first.");
-          setLoading(false);
-          return;
-        }
+        const token = localStorage.getItem('token');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        const headers = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-        const res = await fetch(`${API_URL}/api/summary/yearly?year=${year}`, {
-          headers,
-        });
-
+        const res = await fetch(`${API_URL}/api/summary/yearly?year=${year}`, { headers });
+        if (!res.ok) throw new Error("Backend unavailable");
         const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Backend error");
-        }
-
-        setYearlyData(
-          data.map((item, index) => ({
-            ...item,
-            monthName: monthNames[index],
-            shortName: shortMonthNames[index],
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching yearly data:", error);
-        setErrorMsg("Failed to load yearly data.");
+        setYearlyData(data.map((item, index) => ({
+          ...item,
+          monthName: monthNames[index],
+          shortName: shortMonthNames[index],
+          balance: item.income - item.expense
+        })));
+      } catch (err) {
+        console.error("Failed to fetch yearly data:", err);
+        setYearlyData([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [year]);
 
-  const handlePrevYear = () =>
-    setCurrentDate(new Date(year - 1, 0, 1));
-  const handleNextYear = () =>
-    setCurrentDate(new Date(year + 1, 0, 1));
+  const handlePrevYear = () => setCurrentDate(new Date(year - 1, 0, 1));
+  const handleNextYear = () => setCurrentDate(new Date(year + 1, 0, 1));
 
-  const CHART_MAX_VALUE = 75000;
-  const yAxisLabels = [
-    75000,
-    70000,
-    65000,
-    60000,
-    55000,
-    50000,
-    45000,
-    40000,
-    35000,
-    30000,
-    25000,
-    20000,
-    15000,
-    10000,
-    5000,
-  ];
+  // Y-axis labels
+  const maxIncome = Math.max(...yearlyData.map(d => d.income || 0), 5000);
+  const steps = 10;
+  const stepValue = Math.ceil(maxIncome / steps / 5000) * 5000;
+  const yAxisLabels = Array.from({ length: steps + 1 }, (_, i) => stepValue * (steps - i));
 
   return (
-    <div className="bg-[#444] rounded-lg p-8 border border-[#555] shadow-lg min-h-[600px] relative">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <div className="flex items-center gap-6 absolute left-1/2 transform -translate-x-1/2 top-8">
-          <button
-            onClick={handlePrevYear}
-            className="text-3xl text-white hover:text-[#EFB506] transition cursor-pointer"
-          >
-            <FiChevronLeft />
+    <div className="bg-white dark:bg-[#1e1e1e] rounded-xl p-8 border border-gray-200 dark:border-gray-800 shadow-md min-h-[600px] relative transition-colors duration-300">
+      
+      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+        <div className="flex items-center gap-6">
+          <button onClick={handlePrevYear} className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-500 transition cursor-pointer p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#333]">
+            <ChevronLeftIcon className="w-8 h-8" />
           </button>
-          <h2 className="text-3xl font-bold text-[#EFB506] tracking-widest">
-            {year}
-          </h2>
-          <button
-            onClick={handleNextYear}
-            className="text-3xl text-white hover:text-[#EFB506] transition cursor-pointer"
-          >
-            <FiChevronRight />
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-yellow-500 tracking-widest">{year}</h2>
+          <button onClick={handleNextYear} className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-500 transition cursor-pointer p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#333]">
+            <ChevronRightIcon className="w-8 h-8" />
           </button>
         </div>
-
-        <div className="ml-auto flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-[#00B600]"></div>
-            <span className="text-white font-bold text-lg">Total Balance</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-[#D80000]"></div>
-            <span className="text-white font-bold text-lg">Total Expenses</span>
-          </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-green-500"></div><span className="text-gray-700 dark:text-gray-300 font-medium">Total Balance</span></div>
+          <div className="flex items-center gap-2"><div className="w-4 h-4 rounded bg-red-600"></div><span className="text-gray-700 dark:text-gray-300 font-medium">Total Expenses</span></div>
         </div>
       </div>
 
-      {loading && (
-        <p className="text-center text-gray-300 mt-10">Loading summary...</p>
-      )}
-      {errorMsg && (
-        <p className="text-center text-red-400 mt-10">{errorMsg}</p>
-      )}
-
-      {!loading && !errorMsg && (
-        <div className="flex mt-16 h-[400px] w-full pr-10">
-          <div className="flex flex-col justify-between text-white font-semibold text-sm pr-4 text-right h-full pb-10 w-20">
-            <span className="text-base font-bold mb-2">Rs.</span>
-            {yAxisLabels.map((label) => (
-              <span key={label}>{label.toLocaleString()}</span>
-            ))}
-          </div>
-
-          <div className="flex-1 border-l border-b border-gray-500 flex items-end justify-between px-6 relative">
-            {yearlyData.map((data, index) => {
-              const totalIncomeHeight = Math.min(
-                (data.income / CHART_MAX_VALUE) * 100,
-                100
-              );
-              let expenseHeightPercent = 0;
-              if (data.income > 0) {
-                expenseHeightPercent = (data.expense / data.income) * 100;
-                if (expenseHeightPercent > 100) expenseHeightPercent = 100;
-              }
-
-              return (
-                <div
-                  key={index}
-                  className="flex flex-col items-center justify-end h-full w-full group relative"
-                >
-                  <div
-                    className="w-8 md:w-12 bg-[#00B600] relative transition-all duration-300 hover:opacity-90"
-                    style={{ height: `${totalIncomeHeight}%` }}
-                  >
-                    <div
-                      className="absolute bottom-0 w-full bg-[#D80000]"
-                      style={{ height: `${expenseHeightPercent}%` }}
-                    ></div>
-
-                    {data.income > 0 && (
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max bg-[#222] text-white text-sm rounded p-3 shadow-xl border border-gray-600 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
-                        <h4 className="font-bold text-lg mb-1">
-                          {data.monthName}
-                        </h4>
-                        <div className="text-[#00B600] font-bold">
-                          +Rs.{" "}
-                          {(data.income - data.expense).toLocaleString()}
-                        </div>
-                        <div className="text-[#D80000] font-bold">
-                          -Rs. {data.expense.toLocaleString()}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-white font-bold mt-4 -rotate-90 text-sm md:text-base tracking-wide absolute -bottom-8">
-                    {data.shortName}
-                  </span>
-                </div>
-              );
-            })}
-            <span className="absolute -bottom-8 right-0 text-white font-bold text-lg">
-              Month
-            </span>
-          </div>
+      <div className="flex mt-8 h-[400px] w-full pr-4">
+        <div className="flex flex-col justify-between text-gray-500 dark:text-gray-400 text-xs font-semibold pr-4 text-right h-full pb-8 w-20">
+          <span className="text-base font-bold mb-2">Rs.</span>
+          {yAxisLabels.map(label => (<span key={label}>{label.toLocaleString().replace(/,/g,' ')}</span>))}
+          <span>0</span>
         </div>
-      )}
+        <div className="flex-1 border-l border-b border-gray-300 dark:border-gray-600 flex items-end justify-between px-2 sm:px-6 relative">
+          {!loading && yearlyData.map((data, index) => {
+            const totalIncomeHeight = (data.income / maxIncome) * 100;      // full bar = total income
+            const expenseHeight = (data.expense / maxIncome) * 100;          // red bar relative to chart max
+            const balanceHeight = Math.max(totalIncomeHeight - expenseHeight, 0);  // green bar = remaining balance
+
+            return (
+              <div key={index} className="flex flex-col items-center justify-end h-full w-full group relative">
+
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max bg-gray-800 text-white text-xs rounded p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                  <p className="font-bold mb-1">{data.monthName}</p>
+                  <p className="text-green-400">Balance: {data.balance.toLocaleString()}</p>
+                  <p className="text-red-400">Expenses: {data.expense.toLocaleString()}</p>
+                </div>
+
+                {/* Red expense bar at bottom */}
+                <div className="w-4 sm:w-8 md:w-10 bg-red-600 rounded-t-sm relative" style={{ height: `${expenseHeight}%` }}></div>
+
+                {/* Green balance bar on top */}
+                <div className="w-4 sm:w-8 md:w-10 bg-green-500 rounded-t-sm relative -mt-[1px]" style={{ height: `${balanceHeight}%` }}></div>
+
+                <span className="text-gray-500 dark:text-gray-400 font-medium mt-3 -rotate-90 text-xs tracking-wide absolute -bottom-10">{data.shortName}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

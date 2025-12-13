@@ -1,78 +1,87 @@
 import express from 'express';
-import pkg from 'pg';
 import verifyToken from '../middleware/Auth.js';
+import { pool } from '../db.js';
 
-const { Pool } = pkg;
 const router = express.Router();
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
 
 // Monthly Summary
 router.get('/monthly', verifyToken, async (req, res) => {
   const { year, month } = req.query;
   const userId = req.user.id || req.user.UserID;
-  const userType = req.user.userType || 'Personal'; 
+  const userType = (req.user.type || req.user.userType || 'personal').toLowerCase(); 
+
+  // Validate month
+  const monthNumber = parseInt(month);
+  if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+    return res.status(400).json({ error: 'Invalid month value' });
+  }
 
   try {
-    let incomeQuery = '';
-    let expenseQuery = '';
-    let incomeParams = [userId, year, parseInt(month) + 1];
-    let expenseParams = [userId, year, parseInt(month) + 1];
+    let incomeQuery, expenseQuery;
+    let params = [userId, year, monthNumber];
 
-    if (userType === 'Business') {
+    // Adjust queries based on user type
+    if (userType === 'business') {
       incomeQuery = `
-        SELECT "Busi_In_Date"::date AS date, SUM("Busi_Total_Amount") AS total_income
+        SELECT DATE("Busi_In_Date") AS date, SUM("Busi_Total_Amount") AS total_income
         FROM "Income_Busi"
         WHERE "UserID" = $1
         AND EXTRACT(YEAR FROM "Busi_In_Date") = $2
         AND EXTRACT(MONTH FROM "Busi_In_Date") = $3
-        GROUP BY "Busi_In_Date"
+        GROUP BY DATE ("Busi_In_Date")
+        ORDER BY DATE ("Busi_In_Date")
       `;
       expenseQuery = `
-        SELECT "Busi_Ex_Date"::date AS date, SUM("Busi_Ex_Amount") AS total_expense
+        SELECT DATE("Busi_Ex_Date") AS date, SUM("Busi_Ex_Amount") AS total_expense
         FROM "Expenses_Busi"
         WHERE "UserID" = $1
         AND EXTRACT(YEAR FROM "Busi_Ex_Date") = $2
         AND EXTRACT(MONTH FROM "Busi_Ex_Date") = $3
-        GROUP BY "Busi_Ex_Date"
+        GROUP BY DATE("Busi_Ex_Date")
+        ORDER BY DATE("Busi_Ex_Date")
       `;
     } else {
       incomeQuery = `
-        SELECT "In_Date"::date AS date, SUM("In_Amount") AS total_income
+        SELECT DATE("In_Date") AS date, SUM("In_Amount") AS total_income
         FROM "Income"
         WHERE "UserID" = $1
         AND EXTRACT(YEAR FROM "In_Date") = $2
         AND EXTRACT(MONTH FROM "In_Date") = $3
-        GROUP BY "In_Date"
+        GROUP BY DATE("In_Date")
+        ORDER BY DATE("In_Date")
       `;
       expenseQuery = `
-        SELECT "Ex_Date"::date AS date, SUM("Ex_Amount") AS total_expense
+        SELECT DATE("Ex_Date") AS date, SUM("Ex_Amount") AS total_expense
         FROM "Expenses"
         WHERE "UserID" = $1
         AND EXTRACT(YEAR FROM "Ex_Date") = $2
         AND EXTRACT(MONTH FROM "Ex_Date") = $3
-        GROUP BY "Ex_Date"
+        GROUP BY DATE("Ex_Date")
+        ORDER BY DATE("Ex_Date")
       `;
     }
 
-    const incomeRes = await pool.query(incomeQuery, incomeParams);
-    const expenseRes = await pool.query(expenseQuery, expenseParams);
+    const [incomeRes, expenseRes] = await Promise.all([
+      pool.query(incomeQuery, params),
+      pool.query(expenseQuery, params)
+    ])
 
     const monthlyData = {};
 
+    // Combine income and expense data by date
     incomeRes.rows.forEach(row => {
       const day = new Date(row.date).getDate();
       monthlyData[day] = { income: parseFloat(row.total_income), expense: 0 };
     });
 
+    // Add expense data
     expenseRes.rows.forEach(row => {
       const day = new Date(row.date).getDate();
       if (!monthlyData[day]) monthlyData[day] = { income: 0, expense: 0 };
       monthlyData[day].expense = parseFloat(row.total_expense);
     });
+
+    console.log('Final monthlyData:', monthlyData);
 
     res.json(monthlyData);
   } catch (err) {
@@ -85,45 +94,51 @@ router.get('/monthly', verifyToken, async (req, res) => {
 router.get('/yearly', verifyToken, async (req, res) => {
   const { year } = req.query;
   const userId = req.user.id || req.user.UserID;
-  const userType = req.user.userType || 'Personal'; 
+  const userType = (req.user.type || req.user.userType || 'personal').toLowerCase();
 
   try {
-    let incomeQuery = '';
-    let expenseQuery = '';
-    let incomeParams = [userId, year];
-    let expenseParams = [userId, year];
+    let incomeQuery, expenseQuery;
+    let params = [userId, year];
 
-    if (userType === 'Business') {
+    // Adjust queries based on user type
+    if (userType === 'business') {
       incomeQuery = `
-        SELECT EXTRACT(MONTH FROM "Busi_In_Date") AS month, SUM("Busi_Total_Amount") AS total_income
+        SELECT EXTRACT (MONTH FROM "Busi_In_Date")::int AS month, SUM("Busi_Total_Amount") AS total_income
         FROM "Income_Busi"
         WHERE "UserID" = $1 AND EXTRACT(YEAR FROM "Busi_In_Date") = $2
         GROUP BY month
+        ORDER BY month
       `;
       expenseQuery = `
-        SELECT EXTRACT(MONTH FROM "Busi_Ex_Date") AS month, SUM("Busi_Ex_Amount") AS total_expense
+        SELECT EXTRACT(MONTH FROM "Busi_Ex_Date")::int AS month, SUM("Busi_Ex_Amount") AS total_expense
         FROM "Expenses_Busi"
         WHERE "UserID" = $1 AND EXTRACT(YEAR FROM "Busi_Ex_Date") = $2
         GROUP BY month
+        ORDER BY month
       `;
     } else {
       incomeQuery = `
-        SELECT EXTRACT(MONTH FROM "In_Date") AS month, SUM("In_Amount") AS total_income
+        SELECT EXTRACT(MONTH FROM "In_Date")::int AS month, SUM("In_Amount") AS total_income
         FROM "Income"
         WHERE "UserID" = $1 AND EXTRACT(YEAR FROM "In_Date") = $2
         GROUP BY month
+        ORDER BY month
       `;
       expenseQuery = `
-        SELECT EXTRACT(MONTH FROM "Ex_Date") AS month, SUM("Ex_Amount") AS total_expense
+        SELECT EXTRACT(MONTH FROM "Ex_Date")::int AS month, SUM("Ex_Amount") AS total_expense
         FROM "Expenses"
         WHERE "UserID" = $1 AND EXTRACT(YEAR FROM "Ex_Date") = $2
         GROUP BY month
+        ORDER BY month
       `;
     }
 
-    const incomeRes = await pool.query(incomeQuery, incomeParams);
-    const expenseRes = await pool.query(expenseQuery, expenseParams);
+    const [incomeRes, expenseRes] = await Promise.all([
+      pool.query(incomeQuery, params),
+      pool.query(expenseQuery, params)
+    ]);
 
+    // Initialize yearly data with zeros for all months
     const yearlyData = Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
 
     incomeRes.rows.forEach(row => {

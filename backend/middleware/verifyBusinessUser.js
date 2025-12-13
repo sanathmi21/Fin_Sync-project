@@ -1,5 +1,3 @@
-// middleware/verifyBusinessUser.js
-
 const verifyBusinessUser = (req, res, next) => {
   try {
     // req.user is set by verifyToken middleware

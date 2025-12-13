@@ -6,9 +6,9 @@ import summaryRoutes from '../routes/Summary.js';
 import authRoutes from '../routes/authRoutes.js';
 import transactionsRoutes from '../routes/Transactions.js';
 import dashboardRoutes from '../routes/dashboardRoutes.js';
-import expenseRoutes from '../routes/expenseRoutes.js'; // NEW ADDED
-import incomeRoutes from '../routes/incomeRoutes.js';   // NEW ADDED
-import verifyToken from '../middleware/Auth.js';        // NEW ADDED
+import expenseRoutes from '../routes/expenseRoutes.js'; 
+import incomeRoutes from '../routes/incomeRoutes.js';  
+import verifyToken from '../middleware/Auth.js';        
 
 const { Pool } = pkg;
 
@@ -31,15 +31,20 @@ app.use(express.json());
 app.use('/api/summary', summaryRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionsRoutes);
+
 app.use('/api/dashboard',  verifyToken, dashboardRoutes);
-app.use('/api/expenses', verifyToken, expenseRoutes); // NEW ADDED
-app.use('/api/income', verifyToken, incomeRoutes);    // NEW ADDED
+
+
+app.use('/api/expenses', verifyToken, expenseRoutes); 
+app.use('/api/income', verifyToken, incomeRoutes);   
+
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
+// Test database connection
 pool.connect()
   .then(() => console.log('Connected to Neon PostgreSQL Database!'))
   .catch(err => console.error('Database connection error:', err));
@@ -48,7 +53,7 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
-//------------------NEW ADDED TEST ROUTES----------------------------------
+//NEW ADDED TEST ROUTES
 
 app.get('/test-db', async (req, res) => {
   try {
@@ -68,7 +73,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-//-----------NEW ADDED SERVER LISTENING FOR DEVELOPMENT--------------------
+//NEW ADDED SERVER LISTENING FOR DEVELOPMENT
 
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
