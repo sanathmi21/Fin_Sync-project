@@ -10,6 +10,8 @@ import AddExpenses from './pages/AddExpenses';
 import Summary from './pages/Summary';
 import { useTheme } from './context/ThemeContext';
 
+
+
 function AppContent() {
   const location = useLocation();
   const { theme } = useTheme();
@@ -26,7 +28,8 @@ function AppContent() {
         <Route path="/" element={<FirstPage />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<Dashboard isDarkMode={isDarkMode} />} />
+        <Route path="/dashboard" element={<Dashboard type="personal" isDarkMode={isDarkMode} />} />
+        <Route path="/dashboard-business" element={<Dashboard type="business" isDarkMode={isDarkMode} />} />
         <Route path="/add-expenses" element={<AddExpenses />} />
         <Route path="/add-expenses-business" element={<AddExpensesBusiness />} />  
         <Route path="/summary" element={<Summary />} />

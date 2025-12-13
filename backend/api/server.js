@@ -31,7 +31,7 @@ app.use(express.json());
 app.use('/api/summary', summaryRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionsRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/dashboard',  verifyToken, dashboardRoutes);
 app.use('/api/expenses', verifyToken, expenseRoutes); // NEW ADDED
 app.use('/api/income', verifyToken, incomeRoutes);    // NEW ADDED
 

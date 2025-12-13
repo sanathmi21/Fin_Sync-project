@@ -1,202 +1,290 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-const Dashboard = ({ type = 'personal', isDarkMode = true }) => {
-  const [currentMonth] = useState('January');
-  
-  // Personal Dashboard Data
-  const personalFinancialData = {
-    totalIncome: 8500,
-    totalExpenses: 5200,
-    totalBalance: 3300,
-    expenses: [
-      { name: 'Factory Rent', value: 1560, color: '#00441B', colorLight: '#4ADE80', percentage: 30 },
-      { name: 'Employees Salary', value: 780, color: '#006D2C', colorLight: '#34D399', percentage: 15 },
-      { name: 'Investment', value: 780, color: '#238845', colorLight: '#10B981', percentage: 15 },
-      { name: 'Material Procurement', value: 520, color: '#41AB5D', colorLight: '#059669', percentage: 10 },
-      { name: 'Training', value: 520, color: '#74C476', colorLight: '#047857', percentage: 10 },
-      { name: 'Maintainence', value: 520, color: '#A1D99B', colorLight: '#065F46', percentage: 10 }
-    ]
-  };
+const API_BASE_URL = 'http://localhost:5000/api';
 
-  // Business Dashboard Data
-  const businessFinancialData = {
-    totalIncome: 8500,
-    totalExpenses: 5200,
-    totalBalance: 3300,
-    expenses: [
-      { name: 'Marketing & Advertising', value: 1040, color: '#1E3A8A', colorLight: '#3B82F6', percentage: 20 },
-      { name: 'Office Supplies', value: 780, color: '#7C3AED', colorLight: '#A78BFA', percentage: 15 },
-      { name: 'Utilities & Internet', value: 780, color: '#DC2626', colorLight: '#F87171', percentage: 15 },
-      { name: 'Software & Subscriptions', value: 780, color: '#EA580C', colorLight: '#FB923C', percentage: 15 },
-      { name: 'Travel & Transport', value: 520, color: '#CA8A04', colorLight: '#FDE047', percentage: 10 },
-      { name: 'Professional Services', value: 520, color: '#16A34A', colorLight: '#4ADE80', percentage: 10 },
-      { name: 'Insurance', value: 520, color: '#0891B2', colorLight: '#22D3EE', percentage: 10 },
-      { name: 'Miscellaneous', value: 260, color: '#DB2777', colorLight: '#F472B6', percentage: 5 }
-    ]
-  };
+const Dashboard = ({ type, isDarkMode = true }) => {
+  const [dashboardType, setDashboardType] = useState(type || "personal");
+  const [loading, setLoading] = useState(true);
+  const [expenses, setExpenses] = useState([]);
+  const [incomes, setIncomes] = useState([]);
+  const [financialSummary, setFinancialSummary] = useState({
+    totalIncome: 0,
+    totalExpenses: 0,
+    totalBalance: 0
+  });
+  const [expensesByCategory, setExpensesByCategory] = useState([]);
 
-  // Select data based on type
-  const financialData = type === 'business' ? businessFinancialData : personalFinancialData;
-  const dashboardTitle = type === 'business' ? 'Business Dashboard' : 'Personal Dashboard';
-  const pieChartTitle = type === 'business' 
-    ? 'Business Expense Distribution' 
-    : 'Pie Chart Layer Presenting Business Expenses';
+  const currentMonthYear = (() => {
+    const now = new Date();
+    return {
+      month: now.getMonth() + 1,
+      year: now.getFullYear(),
+      monthName: now.toLocaleString('default', { month: 'long' })
+    };
+  })();
+
+  const [currentMonth] = useState(currentMonthYear.monthName);
+
+  useEffect(() => {
+    if (type) {
+      setDashboardType(type);
+      sessionStorage.setItem("dashboardType", type);
+    }
+  }, [type]);
+
+  useEffect(() => {
+    fetchAllData();
+  }, [dashboardType]);
+
+  // ✅ FIXED VERSION - Matches your controller exactly
+  const fetchAllData = async () => {
+    setLoading(true);
+
+    try {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+
+      // ✅ Get token from localStorage
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        console.error("No token found. Please login.");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Correct URL format: /api/dashboard?year=2025&month=12&type=personal
+      const url = `${API_BASE_URL}/dashboard?year=${year}&month=${month}&type=${dashboardType}`;
+      
+      console.log("📡 Fetching from:", url);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log("📥 Response status:", response.status);
+
+      const result = await response.json();
+      console.log("📦 Response data:", result);
+
+      if (!response.ok || !result.success) {
+        console.error("❌ API Error:", result);
+        setLoading(false);
+        return;
+      }
+
+      const d = result.data;
+
+      // ✅ Set expenses (for counting)
+      setExpenses(d.expenses || []);
+      setIncomes(d.incomes || []);
+
+      // ✅ Set financial summary
+      setFinancialSummary({
+        totalIncome: d.totals?.totalIncome || 0,
+        totalExpenses: d.totals?.totalExpenses || 0,
+        totalBalance: d.totals?.totalBalance || 0
+      });
+
+      // ✅ Set categories for pie chart
+      setExpensesByCategory(d.categories || []);
+
+      console.log("✅ Dashboard loaded successfully");
+
+    } catch (error) {
+      console.error("❌ Dashboard error:", error);
+    }
+
+    setLoading(false);
+  };
 
   const formatCurrency = (amount) => {
-    return `Rs. ${amount.toLocaleString()}`;
+    return `Rs. ${amount.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Theme colors
+  const dashboardTitle =
+    dashboardType === "business" ? "Business Dashboard" : "Personal Dashboard";
+
+  const pieChartTitle =
+    dashboardType === "business"
+      ? "Business Expense Distribution"
+      : "Personal Expense Distribution";
+
   const themeColors = {
-    bg: isDarkMode ? 'bg-black' : 'bg-gray-50',
-    text: isDarkMode ? 'text-white' : 'text-gray-900',
-    textSecondary: isDarkMode ? 'text-zinc-400' : 'text-gray-600',
-    textTertiary: isDarkMode ? 'text-zinc-300' : 'text-gray-700',
-    cardBg: isDarkMode ? 'bg-zinc-900' : 'bg-white',
-    chartBg: isDarkMode ? '#27272a' : '#ffffff',
-    progressBg: isDarkMode ? 'bg-zinc-800' : 'bg-gray-200',
-    pieStroke: isDarkMode ? '#1f1f1f' : '#f3f4f6',
-    tooltipBg: isDarkMode ? '#27272a' : '#ffffff',
-    tooltipBorder: isDarkMode ? 'none' : '1px solid #e5e7eb'
+    bg: isDarkMode ? "bg-black" : "bg-gray-50",
+    text: isDarkMode ? "text-white" : "text-gray-900",
+    textSecondary: isDarkMode ? "text-zinc-400" : "text-gray-600",
+    textTertiary: isDarkMode ? "text-zinc-300" : "text-gray-700",
+    cardBg: isDarkMode ? "bg-zinc-900" : "bg-white",
+    chartBg: isDarkMode ? "#27272a" : "#ffffff",
+    progressBg: isDarkMode ? "bg-zinc-800" : "bg-gray-200",
+    pieStroke: isDarkMode ? "#1f1f1f" : "#f3f4f6",
+    tooltipBg: isDarkMode ? "#27272a" : "#ffffff",
+    tooltipBorder: isDarkMode ? "none" : "1px solid #e5e7eb"
   };
+
+
 
   return (
     <div className={`min-h-screen ${themeColors.bg} ${themeColors.text} p-6 transition-colors duration-300`}>
-      {/* Header */}
+      {/* HEADER */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold">{currentMonth}</h1>
         <p className={`${themeColors.textSecondary} mt-2 text-sm`}>{dashboardTitle}</p>
       </div>
 
-      {/* Summary Cards */}
+      {/* SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Total Income Card */}
-        <div className={`${themeColors.cardBg} rounded-lg p-6 relative overflow-hidden shadow-lg transition-colors duration-300`}>
-          <div className="flex justify-between items-start mb-4">
-            <h3 className={`${themeColors.textSecondary} text-sm font-medium`}>Total Income</h3>
+        {/* Income */}
+        <div className={`${themeColors.cardBg} rounded-lg p-6 relative overflow-hidden shadow-lg`}>
+          <div className="flex justify-between mb-4">
+            <h3 className={`${themeColors.textSecondary}`}>Total Income</h3>
             <TrendingUp className="text-green-500" size={24} />
           </div>
           <p className="text-3xl font-bold text-green-500">
-            {formatCurrency(financialData.totalIncome)}
+            {formatCurrency(financialSummary.totalIncome)}
           </p>
-          <div className="absolute top-4 right-4 opacity-10">
-            <TrendingUp size={80} className="text-green-500" />
-          </div>
+          <p className={`${themeColors.textSecondary} text-xs mt-2`}>
+            {incomes.length} income entries
+          </p>
         </div>
 
-        {/* Total Expenses Card */}
-        <div className={`${themeColors.cardBg} rounded-lg p-6 relative overflow-hidden shadow-lg transition-colors duration-300`}>
-          <div className="flex justify-between items-start mb-4">
-            <h3 className={`${themeColors.textSecondary} text-sm font-medium`}>Total Expenses</h3>
+        {/* Expenses */}
+        <div className={`${themeColors.cardBg} rounded-lg p-6 relative overflow-hidden shadow-lg`}>
+          <div className="flex justify-between mb-4">
+            <h3 className={`${themeColors.textSecondary}`}>Total Expenses</h3>
             <TrendingDown className="text-yellow-500" size={24} />
           </div>
           <p className="text-3xl font-bold text-yellow-500">
-            {formatCurrency(financialData.totalExpenses)}
+            {formatCurrency(financialSummary.totalExpenses)}
           </p>
-          <div className="absolute top-4 right-4 opacity-10">
-            <TrendingDown size={80} className="text-yellow-500" />
-          </div>
+          <p className={`${themeColors.textSecondary} text-xs mt-2`}>
+            {expenses.length} expense entries
+          </p>
         </div>
 
-        {/* Total Balance Card */}
-        <div className={`${themeColors.cardBg} rounded-lg p-6 relative overflow-hidden shadow-lg transition-colors duration-300`}>
-          <div className="flex justify-between items-start mb-4">
-            <h3 className={`${themeColors.textSecondary} text-sm font-medium`}>Total Balance</h3>
-            <Wallet className="text-green-500" size={24} />
+        {/* Balance */}
+        <div className={`${themeColors.cardBg} rounded-lg p-6 relative overflow-hidden shadow-lg`}>
+          <div className="flex justify-between mb-4">
+            <h3 className={`${themeColors.textSecondary}`}>Total Balance</h3>
+            <Wallet
+              className={financialSummary.totalBalance >= 0 ? "text-green-500" : "text-red-500"}
+              size={24}
+            />
           </div>
-          <p className="text-3xl font-bold text-green-500">
-            {formatCurrency(financialData.totalBalance)}
+          <p
+            className={`text-3xl font-bold ${
+              financialSummary.totalBalance >= 0 ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {formatCurrency(financialSummary.totalBalance)}
           </p>
-          <div className="absolute top-4 right-4 opacity-10">
-            <Wallet size={80} className="text-green-500" />
-          </div>
         </div>
       </div>
 
-      {/* Charts Section */}
+      {/* CHARTS SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Expense Distribution Pie Chart */}
-        <div className={`${themeColors.cardBg} rounded-lg p-6 shadow-lg transition-colors duration-300`}>
+        {/* PIE CHART */}
+        <div className={`${themeColors.cardBg} rounded-lg p-6 shadow-lg`}>
           <h3 className="text-xl font-bold mb-6 text-center">{pieChartTitle}</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <PieChart>
-              <Pie
-                data={financialData.expenses}
-                cx="50%"
-                cy="50%"
-                labelLine={true}
-                label={({ name, percentage }) => `${name} ${percentage}%`}
-                outerRadius={120}
-                fill="#8884d8"
-                dataKey="value"
-                strokeWidth={2}
-                stroke={themeColors.pieStroke}
-              >
-                {financialData.expenses.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={isDarkMode ? entry.color : entry.colorLight}
+
+          {expensesByCategory.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={400}>
+                <PieChart>
+                  <Pie
+                    data={expensesByCategory}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={true}
+                    label={({ name, percentage }) => `${name} ${percentage}%`}
+                    outerRadius={120}
+                    fill="#8884d8"
+                    dataKey="value"
+                    strokeWidth={2}
+                    stroke={themeColors.pieStroke}
+                  >
+                    {expensesByCategory.map((entry, index) => (
+                      <Cell key={index} fill={entry.color} />
+                    ))}
+                  </Pie>
+
+                  <Tooltip
+                    formatter={(value) => formatCurrency(value)}
+                    contentStyle={{
+                      backgroundColor: themeColors.tooltipBg,
+                      border: themeColors.tooltipBorder,
+                      borderRadius: "8px",
+                      color: isDarkMode ? "#fff" : "#000"
+                    }}
+                    labelStyle={{ color: isDarkMode ? '#ffffff' : '#000000' }}
+                    itemStyle={{ color: isDarkMode ? '#ffffff' : '#000000' }}
                   />
+                </PieChart>
+              </ResponsiveContainer>
+
+              <div className="grid grid-cols-2 gap-3 mt-6">
+                {expensesByCategory.map((expense, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: expense.color }}
+                    />
+                    <span className={`text-sm ${themeColors.textTertiary}`}>
+                      {expense.name}
+                    </span>
+                  </div>
                 ))}
-              </Pie>
-              <Tooltip 
-                formatter={(value) => formatCurrency(value)}
-                contentStyle={{ 
-                  backgroundColor: themeColors.tooltipBg,
-                  border: themeColors.tooltipBorder,
-                  borderRadius: '8px',
-                  color: isDarkMode ? '#fff' : '#000'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          
-          {/* Custom Legend */}
-          <div className="grid grid-cols-2 gap-3 mt-6">
-            {financialData.expenses.map((expense, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div 
-                  className="w-4 h-4 rounded-full flex-shrink-0"
-                  style={{ 
-                    backgroundColor: isDarkMode ? expense.color : expense.colorLight
-                  }}
-                />
-                <span className={`text-sm ${themeColors.textTertiary}`}>{expense.name}</span>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-96">
+              <p className={themeColors.textSecondary}>No expense data</p>
+            </div>
+          )}
         </div>
 
-        {/* Top Expenses */}
-        <div className={`${themeColors.cardBg} rounded-lg p-6 shadow-lg transition-colors duration-300`}>
-          <h3 className="text-xl font-bold mb-6">Top Expenses</h3>
-          <div className="space-y-4">
-            {financialData.expenses.map((expense, index) => {
-              const percentage = (expense.value / financialData.totalExpenses * 100).toFixed(1);
-              return (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className={themeColors.textTertiary}>{expense.name}</span>
-                    <span className={`text-sm ${themeColors.textSecondary}`}>{percentage}%</span>
+        {/* TOP EXPENSES */}
+        <div className={`${themeColors.cardBg} rounded-lg p-6 shadow-lg`}>
+          <h3 className="text-xl font-bold mb-6">Top Expenses by Category</h3>
+
+          {expensesByCategory.length > 0 ? (
+            <div className="space-y-4">
+              {expensesByCategory.map((expense, index) => (
+                <div key={index}>
+                  <div className="flex justify-between">
+                    <span>{expense.name}</span>
+                    <span>
+                      {formatCurrency(expense.value)} ({expense.percentage}%)
+                    </span>
                   </div>
-                  <div className={`w-full ${themeColors.progressBg} rounded-full h-3`}>
-                    <div 
-                      className="h-3 rounded-full transition-all duration-500"
-                      style={{ 
-                        width: `${percentage}%`,
-                        backgroundColor: isDarkMode ? expense.color : expense.colorLight
+
+                  <div className={`${themeColors.progressBg} rounded-full h-3 mt-2`}>
+                    <div
+                      className="h-3 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${expense.percentage}%`,
+                        backgroundColor: expense.color
                       }}
                     />
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-96">
+              <p className={themeColors.textSecondary}>No data available</p>
+            </div>
+          )}
         </div>
       </div>
-
     </div>
   );
 };

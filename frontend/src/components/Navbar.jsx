@@ -8,9 +8,11 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   const userType = localStorage.getItem('userType') || 'Personal';
+  const dashboardPath = userType === 'Business' ? '/dashboard-business' : '/dashboard';
+
 
   const baseLinks = [
-    { name: 'DashBoard', path: '/dashboard' },
+    { name: 'DashBoard', path: dashboardPath },
     { name: 'Summary', path: '/summary' },
   ];
 
