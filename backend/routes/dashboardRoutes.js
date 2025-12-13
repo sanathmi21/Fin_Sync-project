@@ -4,7 +4,10 @@ import verifyToken from '../middleware/Auth.js';
 import cors from "cors";
 
 const corsMiddleware = cors({
-  origin: "http://localhost:5173",
+  origin: [
+    "http://localhost:5173",
+    "https://fin-sync-project-frontend.vercel.app"
+  ],
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 });
@@ -182,5 +185,6 @@ router.get('/debug-business-expenses', verifyToken, async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 export default router;
