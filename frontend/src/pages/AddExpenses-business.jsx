@@ -108,7 +108,7 @@ export default function AddExpenses() {
 
   const totalIncAmount = (Number(incForm.unitAmount) || 0) * (Number(incForm.quantity) || 0);
 
-  const API_URL = 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
