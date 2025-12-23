@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const ChevronLeftIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -12,17 +12,19 @@ const ChevronRightIcon = ({ className }) => (
   </svg>
 );
 
-//Main YearlyView Component
 export default function YearlyView() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [yearlyData, setYearlyData] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const chartHeight = 400; 
+  const steps = 5;
+ 
   const year = currentDate.getFullYear();
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const shortMonthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  // Fetch yearly data when year changes
+  // Fetch yearly data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -54,15 +56,15 @@ export default function YearlyView() {
   const handlePrevYear = () => setCurrentDate(new Date(year - 1, 0, 1));
   const handleNextYear = () => setCurrentDate(new Date(year + 1, 0, 1));
 
-  // Y-axis labels
-  const maxIncome = Math.max(...yearlyData.map(d => d.income || 0), 5000);
-  const steps = 10;
-  const stepValue = Math.ceil(maxIncome / steps / 5000) * 5000;
-  const yAxisLabels = Array.from({ length: steps + 1 }, (_, i) => stepValue * (steps - i));
+  // Y-axis scaling
+  const maxValue = Math.max(...yearlyData.map(d => Math.max(d.income || 0, d.expense || 0)), 1);
+  const stepValue = Math.ceil(maxValue / steps / 1000) * 1000; 
+  const yAxisLabels = Array.from({ length: steps + 1 }, (_, i) => stepValue * i);
 
   return (
     <div className="bg-white dark:bg-[#1e1e1e] rounded-xl p-8 border border-gray-200 dark:border-gray-800 shadow-md min-h-[600px] relative transition-colors duration-300">
       
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
         <div className="flex items-center gap-6">
           <button onClick={handlePrevYear} className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-500 transition cursor-pointer p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#333]">
@@ -79,34 +81,47 @@ export default function YearlyView() {
         </div>
       </div>
 
-      <div className="flex mt-8 h-[400px] w-full pr-4">
-        <div className="flex flex-col justify-between text-gray-500 dark:text-gray-400 text-xs font-semibold pr-4 text-right h-full pb-8 w-20">
+      {/* Chart */}
+      <div className="flex mt-8 pt-4 relative">
+        {/* Y-axis */}
+        <div className="relative w-20 h-[400px] flex flex-col justify-between text-gray-500 dark:text-gray-400 text-xs font-semibold">
           <span className="text-base font-bold mb-2">Rs.</span>
-          {yAxisLabels.map(label => (<span key={label}>{label.toLocaleString().replace(/,/g,' ')}</span>))}
-          <span>0</span>
+          {yAxisLabels.map((label, index) => (
+            <span 
+              key={label} 
+              className="absolute right-0 text-gray-500 dark:text-gray-400 text-xs font-semibold"
+              style={{ bottom: `${(index / steps) * chartHeight}px` }} 
+            >
+              {label.toLocaleString().replace(/,/g,' ')}
+            </span>
+          ))}
         </div>
-        <div className="flex-1 border-l border-b border-gray-300 dark:border-gray-600 flex items-end justify-between px-2 sm:px-6 relative">
+
+        {/* Bars */}
+        <div className="flex-1 border-l border-b border-gray-300 dark:border-gray-600 flex items-end justify-between px-2 sm:px-6 relative h-[400px]">
           {!loading && yearlyData.map((data, index) => {
-            const totalIncomeHeight = (data.income / maxIncome) * 100;      // full bar = total income
-            const expenseHeight = (data.expense / maxIncome) * 100;          // red bar relative to chart max
-            const balanceHeight = Math.max(totalIncomeHeight - expenseHeight, 0);  // green bar = remaining balance
+            const incomeHeightPx = (data.income / maxValue) * chartHeight;
+            const expenseHeightPx = (data.expense / maxValue) * chartHeight;
+            const balanceHeightPx = incomeHeightPx - expenseHeightPx;
 
             return (
               <div key={index} className="flex flex-col items-center justify-end h-full w-full group relative">
-
+                {/* Tooltip */}
                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max bg-gray-800 text-white text-xs rounded p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                   <p className="font-bold mb-1">{data.monthName}</p>
-                  <p className="text-green-400">Balance: {data.balance.toLocaleString()}</p>
-                  <p className="text-red-400">Expenses: {data.expense.toLocaleString()}</p>
+                  <p className="text-green-400">Bal: {data.balance.toLocaleString()}</p>
+                  <p className="text-red-400">Exp: {data.expense.toLocaleString()}</p>
                 </div>
 
-                {/* Red expense bar at bottom */}
-                <div className="w-4 sm:w-8 md:w-10 bg-red-600 rounded-t-sm relative" style={{ height: `${expenseHeight}%` }}></div>
+                {/* Expense */}
+                <div className="w-4 sm:w-8 md:w-10 bg-red-600" style={{ height: `${expenseHeightPx}px` }}></div>
 
-                {/* Green balance bar on top */}
-                <div className="w-4 sm:w-8 md:w-10 bg-green-500 rounded-t-sm relative -mt-[1px]" style={{ height: `${balanceHeight}%` }}></div>
+                {/* Balance */}
+                <div className="w-4 sm:w-8 md:w-10 bg-green-500 -mt-[1px]" style={{ height: `${balanceHeightPx}px` }}></div>
 
-                <span className="text-gray-500 dark:text-gray-400 font-medium mt-3 -rotate-90 text-xs tracking-wide absolute -bottom-10">{data.shortName}</span>
+                <span className="text-gray-500 dark:text-gray-400 font-medium mt-3 -rotate-90 text-xs tracking-wide absolute -bottom-10">
+                  {data.shortName}
+                </span>
               </div>
             );
           })}
