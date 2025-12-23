@@ -113,21 +113,21 @@ export default function MonthlyView() {
     setCurrentDate(new Date(year, month + 1, 1)); // Go to next month
 
   return (
-    <div className="bg-[#444] rounded-lg p-6 border border-[#555] shadow-lg min-h-[600px]">
+    <div className="bg-white dark:bg-[#1e1e1e] rounded-xl p-8 border border-gray-200 dark:border-gray-800 shadow-md min-h-[600px] relative transition-colors duration-300">
       {/* Header */}
-      <div className="flex justify-center items-center gap-8 mb-10">
+      <div className="flex justify-center items-center gap-8 mb-10 ">
         <button
           onClick={handlePrevMonth}
-          className="text-2xl text-white hover:text-[#EFB506] transition cursor-pointer"
+          className="text-2xl hover:text-[#EFB506] transition cursor-pointer text-gray-900 dark:text-white"
         >
           <ChevronLeftIcon />
         </button>
-        <h2 className="text-xl font-bold text-[#EFB506] uppercase tracking-wider w-[200px] text-center">
+        <h2 className="text-xl font-bold text-[#EFB506] uppercase tracking-wider w-[200px] text-center ">
           {monthNames[month]} {year}
         </h2>
         <button
           onClick={handleNextMonth}
-          className="text-2xl text-white hover:text-[#EFB506] transition cursor-pointer"
+          className="text-2xl hover:text-[#EFB506] transition cursor-pointer text-gray-900 dark:text-white"
         >
           <ChevronRightIcon />
         </button>
@@ -143,7 +143,7 @@ export default function MonthlyView() {
       {!loading && !errorMsg && (
         <div className="grid grid-cols-7 text-center">
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
-            <div key={day} className="text-white font-bold mb-4">
+            <div key={day} className=" font-bold mb-4 text-gray-900 dark:text-white">
               {day}
             </div>
           ))}
@@ -161,7 +161,7 @@ export default function MonthlyView() {
                 key={dayNum}
                 className="h-24 flex flex-col items-center relative group border-t border-transparent hover:border-[#555]"
               >
-                <span className="text-white font-semibold text-lg mb-1">
+                <span className="font-semibold text-lg mb-1 text-gray-900 dark:text-white">
                   {dayNum}
                 </span>
 
