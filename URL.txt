@@ -1,0 +1,5 @@
+backend deployment link
+https://fin-sync-project-ul8x.vercel.app
+
+frontend deployment link
+https://fin-sync-project-frontend.vercel.app
